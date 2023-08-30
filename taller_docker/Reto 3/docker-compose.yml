@@ -1,0 +1,36 @@
+version: '3'
+services:
+  server:
+    image: servidor-r3 
+
+  client:
+    image: cliente-r3
+    environment:
+      USER: Escanor  
+      SERVIDOR_DIRECCION: server  
+       
+    depends_on:
+      - server
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  

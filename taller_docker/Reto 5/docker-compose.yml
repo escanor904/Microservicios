@@ -1,0 +1,37 @@
+services:
+  server:
+    image: servidor-r5 
+
+  client:
+    image: cliente-r5
+    environment:  
+      SERVIDOR_DIRECCION: server  
+      ID_USUARIO : 3456
+      NOMBRE : PEDRO
+       
+    depends_on:
+      - server
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  

@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  servidor:
+    image: server-r3
+    ports:
+      - "8080:80"
+    networks:
+      - mi_red
+
+  cliente:
+    image: cliente-r3
+    networks:
+      - mi_red
+
+networks:
+  mi_red:
