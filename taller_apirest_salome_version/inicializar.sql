@@ -9,9 +9,10 @@ CREATE TABLE users (
 
 -- Insertar datos de prueba en la tabla users
 INSERT INTO users (username, hashed_password, email) VALUES
-  ('camilo23', 'contracami', 'camilo@email.com'),
-  ('user1', 'contras', 'user1@email.com'),
-  ('kille', 'kille12', 'kille222@email.com'),
-  ('mariag21', 'mag12', 'mariag@email.com'),
-  ('daniel', 'daniel11', 'daniel23@email.com');
+  ('Pepito perez', '12', 'pepito_p@email.com'),
+  ('Ricardo Jorge', '13', 'ricardo_j@email.com'),
+  ('Adolf Hitler ', '14', 'adolf_h@email.com'),
+  ('Cristiano Ronaldo', '15', 'cristiano_r@email.com'),
+  ('Rocket Raccoon', '16', 'rocket_r@email.com');
+  ('Isaac Newton', '16', 'isaac_n@email.com');
 
