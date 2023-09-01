@@ -4,32 +4,23 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token, ge
 from random import choices
 from string import ascii_letters, digits
 from datetime import datetime, timedelta
+from config import db_config , DevelopmentConfig
 
 
 app = Flask(__name__)
 # Configuración del JWT
-app.config['JWT_SECRET_KEY'] = 'mypass'
+app.config['JWT_SECRET_KEY'] = DevelopmentConfig.SECRET_KEY
 jwt = JWTManager(app)
 
 # Almacén temporal para guardar los tokens de recuperación
 reset_tokens = {}
 
-# Configuración de la base de datos
-db_config = {
-    'dbname': 'authentication_db',
-    'user': 'admin',
-    'password': 'admin_password',
-    #en mi S.O es con localhost pero por defecto es: 'host': 'auth_postgres's
-    'host': 'localhost'
-}
 
 #--------------------------------------LOGIN-------------------------------------
 @app.route('/inicio_sesion', methods=['POST'])
 def inicio_sesion():
     # Establecer una conexión con la base de datos PostgreSQL
-    print("pasooo")
     conn = psycopg2.connect(**db_config)
-    print("pasooo")
     cursor = conn.cursor()
 
     # Obtener los datos del inicio de sesión desde la carga JSON de la solicitud HTTP
