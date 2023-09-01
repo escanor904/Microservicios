@@ -5,6 +5,7 @@ from random import choices
 from string import ascii_letters, digits
 from datetime import datetime, timedelta
 
+
 app = Flask(__name__)
 # Configuración del JWT
 app.config['JWT_SECRET_KEY'] = 'mypass'
@@ -18,14 +19,17 @@ db_config = {
     'dbname': 'authentication_db',
     'user': 'admin',
     'password': 'admin_password',
-    'host': 'auth_postgres'
+    #en mi S.O es con localhost pero por defecto es: 'host': 'auth_postgres's
+    'host': 'localhost'
 }
 
 #--------------------------------------LOGIN-------------------------------------
 @app.route('/inicio_sesion', methods=['POST'])
 def inicio_sesion():
     # Establecer una conexión con la base de datos PostgreSQL
+    print("pasooo")
     conn = psycopg2.connect(**db_config)
+    print("pasooo")
     cursor = conn.cursor()
 
     # Obtener los datos del inicio de sesión desde la carga JSON de la solicitud HTTP
@@ -138,9 +142,12 @@ def restablecemiento_contrasena():
 # Definición de una ruta para listar todos los usuarios por paginacion
 @app.route('/users', methods=['GET'])
 def list_users():
+   
     try:
         # Realiza la conexión con la base de datos
+        
         conn = psycopg2.connect(**db_config)
+        print("hola pedro")
         cursor = conn.cursor()
 
         # Obtén los parámetros de paginación de la solicitud (por defecto, página 1 y tamaño de página 10)
@@ -295,8 +302,16 @@ def eliminacion_usuario():
         return jsonify({"error": str(e)}), 500
 
 #---------------------------------------FIN CRUD---------------------------------------
+ 
 
+
+
+def status_404(error):
+    return "<h1>Página no encontrada</h1>", 404
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    #Se activa el debug para poder hacer cambios en el servidor en tiempo real
+    app.debug = True
+    app.register_error_handler(404, status_404)
+    app.run()

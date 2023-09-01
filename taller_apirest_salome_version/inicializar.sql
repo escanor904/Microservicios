@@ -13,6 +13,6 @@ INSERT INTO users (username, hashed_password, email) VALUES
   ('Ricardo Jorge', '13', 'ricardo_j@email.com'),
   ('Adolf Hitler ', '14', 'adolf_h@email.com'),
   ('Cristiano Ronaldo', '15', 'cristiano_r@email.com'),
-  ('Rocket Raccoon', '16', 'rocket_r@email.com');
+  ('Rocket Raccoon', '16', 'rocket_r@email.com'),
   ('Isaac Newton', '16', 'isaac_n@email.com');
 
