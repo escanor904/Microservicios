@@ -54,6 +54,7 @@ def inicio_sesion():
 def cambio_contrasena():
     # Obtener la identidad del usuario desde el token JWT
     current_user_email = get_jwt_identity()
+    print(current_user_email)
 
     # Establecer una conexión con la base de datos PostgreSQL
     conn = psycopg2.connect(**db_config)
@@ -83,17 +84,33 @@ def recuperacion_contrasena():
     # Obtener el correo electrónico proporcionado por el usuario
     data = request.get_json()
     email = data['email']
+    
+    # Establecer una conexión con la base de datos PostgreSQL
+    conn = psycopg2.connect(**db_config)
+    cursor = conn.cursor()
+    
+    # Buscar al usuario en la base de datos por su email
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cursor.fetchone()
+    
+    # Verificar si la variable no es nula, esto asegura que si encontro un usuario
+    if user != None:
+       
+           # Generar un token de recuperación de contraseña
+        reset_token = ''.join(choices(ascii_letters + digits, k=20))
+        # Le da un tiempo al token
+        expiration_time = datetime.now() + timedelta(minutes=30)
+        reset_tokens[email] = {'token': reset_token, 'expiration_time': expiration_time}
+        # reset_token  # Almacenar el token en el almacén temporal
 
-    # Generar un token de recuperación de contraseña
-    reset_token = ''.join(choices(ascii_letters + digits, k=20))
-    # Le da un tiempo al token
-    expiration_time = datetime.now() + timedelta(minutes=30)
-    reset_tokens[email] = {'token': reset_token, 'expiration_time': expiration_time}
-    # reset_token  # Almacenar el token en el almacén temporal
+        # En un escenario real, se debería enviar un correo electrónico con un enlace que contenga el token
+        # Aquí solo mostramos el token generado para fines de demostración
+        return jsonify({"mensaje": "Se ha generado un token de recuperacion", "token": reset_token}), 200
+    
+    else:
+    # La variable es nula, puedes manejar este caso aquí
+        return jsonify({"mensaje": "No existe ningún registro correspondiente a este usuario en la base de datos"}), 401
 
-    # En un escenario real, se debería enviar un correo electrónico con un enlace que contenga el token
-    # Aquí solo mostramos el token generado para fines de demostración
-    return jsonify({"mensaje": "Se ha generado un token de recuperacion", "token": reset_token}), 200
 
 @app.route('/restablecemiento_contra', methods=['POST'])
 def restablecemiento_contrasena():
