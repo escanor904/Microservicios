@@ -52,13 +52,14 @@ def inicio_sesion():
 @app.route('/cambio_contrasena', methods=['POST'])
 @jwt_required()
 def cambio_contrasena():
-    # Obtener la identidad del usuario desde el token JWT
-    current_user_email = get_jwt_identity()
-    print(current_user_email)
-
+    
     # Establecer una conexión con la base de datos PostgreSQL
     conn = psycopg2.connect(**db_config)
     cursor = conn.cursor()
+    
+    # Obtener la identidad del usuario desde el token JWT
+    current_user_email = get_jwt_identity()
+    print(current_user_email)
 
     # Obtener los datos de la nueva contraseña desde la carga JSON de la solicitud HTTP
     data = request.get_json()
@@ -81,13 +82,13 @@ def cambio_contrasena():
 # Ruta para solicitar recuperación de contraseña
 @app.route('/recuperacion_contra', methods=['POST'])
 def recuperacion_contrasena():
-    # Obtener el correo electrónico proporcionado por el usuario
-    data = request.get_json()
-    email = data['email']
-    
     # Establecer una conexión con la base de datos PostgreSQL
     conn = psycopg2.connect(**db_config)
     cursor = conn.cursor()
+    
+    # Obtener el correo electrónico proporcionado por el usuario
+    data = request.get_json()
+    email = data['email']
     
     # Buscar al usuario en la base de datos por su email
     cursor.execute("SELECT * FROM users WHERE email = %s", (email,))

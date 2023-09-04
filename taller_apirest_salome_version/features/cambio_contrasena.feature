@@ -3,23 +3,24 @@ Feature: Cambio de contrasena
   #Este caso de prueba se enfocará en que las credenciales son validas
   Scenario: Contraseña actualizada con éxito
           
-    #Requerimiento: 
-    Given estar en la dirección asignada a el cambio de contrasena
+    #Requerimientos: 
+    Given establecer la conexion con la base de datos
+    And Obtener la identidad del usuario desde el token JWT
      #Acción
-     When se introduce la nueva contrasena
+     When Obtener los datos de la nueva contraseña desde la carga JSON de la solicitud
      #Condicion extra
-     And envio el formulario 
+     And Actualizar la contraseña del usuario en la base de datos 
      #Resultado esperado
-     Then se muestra el mensaje "Contrasena actualizada exitosamente"
+     Then se muestra el mensaje "Contraseña actualizada exitosamente"
 
   #Este caso de prueba se enfocará en que las credenciales son validas
   Scenario: La contraseña no pudo ser modificada
-          
-    #Requerimiento: 
-    Given estar en la dirección asignada a el cambio de contrasena
+    #Requerimientos: 
+    Given establecer la conexion con la base de datos
+    And Obtener la identidad del usuario desde el token JWT
      #Acción
-     When se introduce la nueva contrasena
+     When Obtener los datos de la nueva contraseña desde la carga JSON de la solicitud
      #Condicion extra
-     And envio el formulario 
-     #Resultado esperado
+     And Actualizar la contraseña del usuario en la base de datos       
+
      Then se muestra el mensaje "Invalid header string: ..." 
