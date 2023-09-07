@@ -59,12 +59,12 @@ def cambio_contrasena():
     
     # Obtener la identidad del usuario desde el token JWT
     current_user_email = get_jwt_identity()
-    print(current_user_email)
 
     # Obtener los datos de la nueva contraseña desde la carga JSON de la solicitud HTTP
     data = request.get_json()
     new_password = data['new_password']
 
+    
     # Actualizar la contraseña del usuario en la base de datos
     cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
                    (new_password, current_user_email))
@@ -195,7 +195,6 @@ def list_users():
 #--------------------------------------CRUD--------------------------------------
 # Definición de una ruta para el registro de usuarios
 @app.route('/registro', methods=['POST'])
-
 def registro_usuario():
     # Establecer una conexión con la base de datos PostgreSQL
     conn = psycopg2.connect(**db_config)

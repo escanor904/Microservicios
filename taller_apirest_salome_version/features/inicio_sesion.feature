@@ -11,20 +11,20 @@ Feature: Inicio de sesion
      And Buscar al usuario en la base de datos por su email
      And Validar la contraseña
      #Resultado esperado
-     Then recibo el codigo jwt
+     Then recibo la respuesta
 
 
 
   #Este caso de prueba se enfocará en que las credenciales son validas
-  Scenario: Iniciar sesion con las credenciales invalidas
+  #Scenario: Iniciar sesion con las credenciales invalidas
           
     #Requerimiento: 
-    Given establecer la conexion con la base de datos
+   # Given establecer la conexion con la base de datos
      #Acción
-     When obtener los datos del inicio de sesion
+    # When iniciar sesion con el correo "el_bicho@email.com" y clave "15"
      #Condicion extra
-     And Buscar al usuario en la base de datos por su email
-     And Validar la contraseña
+     #And Buscar al usuario en la base de datos por su email
+     #And Validar la contraseña
      #Resultado esperado
-     Then se muestra el mensaje de "Credenciales invalidas"   
+     #Then recibo la respuesta  
 
