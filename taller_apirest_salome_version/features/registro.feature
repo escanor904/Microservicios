@@ -4,9 +4,11 @@ Feature: Registro del usuario
   Scenario: Registro exitoso de un nuevo usuario
           
     #Requerimiento: 
-    Given establecer la conexion con la base de datos
+    Given el usuario accede a la página de registro
      #Acción
-     When obtener los datos del usuario con el usuario "caristiano", la contrasena "22" y el correo "cristiano_rr@email.com"
+     When se proporcionan los datos validos del usuario
+     #Condicion extra
+     And el usuario envía el formulario
      #Resultado esperado
      Then se recibe una respuesta con codigo estado 201
      And la respuesta contiene el mensaje "Usuario registrado exitosamente"
