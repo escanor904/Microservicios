@@ -4,9 +4,10 @@ Feature: recuperación de contraseña
   Scenario: Se valida el usuario 
           
     #Requerimiento: 
-    Given establecer la conexion RC
+    #tener un usuario previamente registrado
+    Given tener el un usuario previamente registrado
      #Acción
-     When el correo electronico que proporciona el usuario es "cristiano_r@email.com"
+     When el correo con el que se hace la solicitud debe estar en la base de datos
      #Condicion extra
      And Buscar al usuario en la base de datos por su email RC
      And Generar un token de recuperación de contraseña

@@ -11,6 +11,15 @@ db_config = {
     'host': 'localhost'
 }
 
+@given('establecer la conexion RC')
+def establecer_conexion(context):  
+    # Establecer la conexión con la base de datos
+    conn = psycopg2.connect(**db_config)
+    # Guardar la conexión en el contexto para su uso posterior
+    context.db_connection = conn
+    # Aseguro que la coneccion es diferente de null
+    assert conn != None
+    
 
 
 

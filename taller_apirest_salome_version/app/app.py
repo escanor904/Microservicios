@@ -113,6 +113,7 @@ def recuperacion_contrasena():
         return jsonify({"mensaje": "No existe ningún registro correspondiente a este usuario en la base de datos"}), 401
 
 
+#-------------------------------------RESTABLECIMIENTO CONTRASEÑA-------------------------------------
 @app.route('/restablecemiento_contra', methods=['POST'])
 def restablecemiento_contrasena():
     data = request.get_json()
@@ -147,16 +148,14 @@ def restablecemiento_contrasena():
         return jsonify({"mensaje": "No se encontro el token de recuperacion"}), 400
 
 
-
+#---------------------------------LISTAR USUARIOS PAGINADOS------------------------------------
 # Definición de una ruta para listar todos los usuarios por paginacion
 @app.route('/users', methods=['GET'])
 def list_users():
    
     try:
         # Realiza la conexión con la base de datos
-        
         conn = psycopg2.connect(**db_config)
-        print("hola pedro")
         cursor = conn.cursor()
 
         # Obtén los parámetros de paginación de la solicitud (por defecto, página 1 y tamaño de página 10)
@@ -200,22 +199,36 @@ def registro_usuario():
     conn = psycopg2.connect(**db_config)
     cursor = conn.cursor()
 
-    # Obtener los datos del usuario desde la carga JSON de la solicitud HTTP
-    data = request.get_json()
-    username = data['username']
-    password = data['password']
-    email = data['email']
+    try:
+        # Obtener los datos del usuario desde la carga JSON de la solicitud HTTP
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        email = data.get('email')
 
-    # Ejecutar una consulta SQL para insertar los datos del usuario en la tabla 'users'
-    cursor.execute("INSERT INTO users (username, hashed_password, email) VALUES (%s, %s, %s)",
-                   (username, password, email))
+        # Verificar si alguno de los campos está vacío
+        if not username or not password or not email:
+            return jsonify({"error": "Diligencia todos los campos"}), 400
 
-    # Confirmar la transacción y cerrar el cursor y la conexión
-    conn.commit()
-    cursor.close()
-    conn.close()
+        # Verificar si el usuario ya existe (por nombre de usuario o correo electrónico)
+        cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s OR email = %s", (username, email))
+        existe_usuario = cursor.fetchone()[0]
+        if existe_usuario:
+            return jsonify({"error": "Ese usuario o corre electronico ya exiesta registrado"}), 409
 
-    return jsonify({"mensaje": "Usuario registrado exitosamente"}), 201
+        # Ejecutar una consulta SQL para insertar los datos del usuario en la tabla 'users'
+        cursor.execute("INSERT INTO users (username, hashed_password, email) VALUES (%s, %s, %s)",
+                       (username, password, email))
+
+        # Confirmar la transacción y cerrar el cursor y la conexión
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"mensaje": "Usuario registrado exitosamente"}), 201
+
+    except Exception as e:
+        return jsonify({"error": "Error en el servidor"}), 500
 
 
 # Definición de una ruta para obtener un usuario
