@@ -16,6 +16,3 @@ def seleccionar_usuario(context):
     #Establecer la conexion con la base de datos
     conn = psycopg2.connect(**db_config)
     cursor = conn.cursor()
-
-@given('obtener la informacion del usuario desde su id: "{user_id}')
-def
