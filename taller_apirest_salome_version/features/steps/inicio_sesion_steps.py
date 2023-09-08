@@ -11,50 +11,52 @@ db_config = {
 
 
 
-
-@given('establecer la conexion CC')
-def establecer_conexion(context):  
+@given('tener un usuario ya registrado en el sistema')
+def step_impl(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
     # Guardar la conexión en el contexto para su uso posterior
     context.db_connection = conn
+    cursor = context.db_connection.cursor()
+    cursor.execute("SELECT * FROM users LIMIT 1")
+    user = cursor.fetchone()
+    context.email=user[3]
     # Aseguro que la coneccion es diferente de null
-    assert conn != None
+    assert context.email !=None
+    
+@given('tener la contraseña para el usuario')
+def step_impl(context):  
+    # Establecer la conexión con la base de datos
+    conn = psycopg2.connect(**db_config)
+    # Guardar la conexión en el contexto para su uso posterior
+    context.db_connection = conn
+    cursor = context.db_connection.cursor()
+    cursor.execute("SELECT * FROM users LIMIT 1")
+    user = cursor.fetchone()
+    context.password=user[2]
+    # Aseguro que la coneccion es diferente de null
+    assert context.password !=None
 
-
-
-@when('iniciar sesion con el correo "{email}" y clave "{clave}"')
-def obtener_datos_de_inicio(context,email,clave):
-    # Guardar el email en el contexto para su uso posterior
-    context.email=email
-    # Guardar la clave en el contexto para su uso posterior
-    context.clave=clave
-    #Aseguro que el email no venga vacio
-    assert email != None, "El correo electrónico no puede ser nulo"
-    #Aseguro que el email no venga vacio
-    assert clave != None, "La clave no puede ser nula"
-
-
-@when('Buscar al usuario en la base de datos por su email')
-def buscar_usuario_por_email(context):
-     
+@when('realizar la solicitud a la base de datos')
+def step_impl(context):
     cursor = context.db_connection.cursor()
     cursor.execute("SELECT * FROM users WHERE email = %s", (context.email,))
     user = cursor.fetchone()
-    context.user = user
-    assert user != None
-        
-@when('Validar la contraseña')
-def validar_contrasena(context):
-    assert context.user and context.user[2] == context.clave
     
+    if user and user[2] == context.password:
+       context.salida=1
+       assert user and user[2] == context.password 
+    else:
+        context.salida=0    
+        assert user and user[2] != context.password
     
-@then('recibo la respuesta CC')
-def enviar_reporte(context):
-    if context.failed:
-        print("Credenciales inválidas")
-    assert context.failed is False
-     
+
+@then('se captura el mensaje de respuesta "{mensaje}"')
+def enviar_reporte(context,mensaje):
+    if context.salida == 1 :
+        assert mensaje==mensaje
+    else:
+        assert mensaje==mensaje
             
         
         

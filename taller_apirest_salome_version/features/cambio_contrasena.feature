@@ -4,23 +4,21 @@ Feature: Cambio de contrasena
   Scenario: Contraseña actualizada con éxito
           
     #Requerimientos: 
-    Given establecer la conexion CC
-    And Obtener la identidad del usuario desde el token JWT: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImNyaXN0aWFub19yQGVtYWlsLmNvbSJ9.X4R3IAM-SMtaIHnT6G_xzgfZx5H2X0jh9Ju4uRWyIco"
+    Given tener un usuario en sesion
+    And tener una contrasena valida
      #Acción
-     When La contrasena para la actualizacion es "16"
-     #Condicion extra
-     And Actualizar la contraseña del usuario en la base de datos 
+     When hacer la solicitud a el servidor que actualice la contrasena
      #Resultado esperado
-     Then se muestra el mensaje de exito "Contraseña actualizada exitosamente"
+     Then se muestra el mensaje que retorna el server "Contraseña actualizada exitosamente    status code:200"
 
   #Este caso de prueba se enfocará en que las credenciales son validas
-  #Scenario: La contraseña no pudo ser modificada
+  Scenario: Contraseña actualizada con éxito
+          
     #Requerimientos: 
-    #Given establecer la conexion 
-    #And Obtener la identidad del usuario con un token invalido: "fyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImNyaXN0aWFub19yQGVtYWlsLmNvbSJ9.X4R3IAM-SMtaIHnT6G_xzgfZx5H2X0jh9Ju4uRWyIco"
+    Given no tener un un usuario en sesion
+    And tener una contrasena no valida
      #Acción
-     #When La contrasena para la actualizacion es "16"
-     #Condicion extra
-     #And Actualizar la contraseña del usuario en la base de datos       
+     When hacer la solicitud a el servidor que actualice la contrasena
+     #Resultado esperado
+     Then se muestra el mensaje que retorna el server "error     status code:400"   
 
-     #Then se muestra el mensaje de fallo "Invalid header string: ..." 
