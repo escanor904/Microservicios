@@ -5,17 +5,20 @@ Feature: recuperación de contraseña
           
     #Requerimiento: 
     #tener un usuario previamente registrado
-    Given tener el un usuario previamente registrado
+    Given ser un usuario previamente registrado
      #Acción
-     When el correo con el que se hace la solicitud debe estar en la base de datos
+     When se realiza la solicitud al servidor 
      #Condicion extra
-     And Buscar al usuario en la base de datos por su email RC
-     And Generar un token de recuperación de contraseña
-     #Resultado esperado
-     Then se muestra el token 
+     Then se obtiene el mensaje de respuesta "status code:200"
 
-    #Scenario: No se valida el usuario 
-          
+     
+      
+
+  Scenario: No se valida el usuario 
+     Given tener un usuario que no este registrado 
+     When se realiza la solicitud al servidor
+     Then se obtiene el mensaje de respuesta "status code:400"
+
     #Given establecer la conexion con la base de datos
      #Acción
      #When Obtener el correo electrónico proporcionado por el usuario

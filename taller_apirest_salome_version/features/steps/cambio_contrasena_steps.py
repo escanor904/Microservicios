@@ -14,7 +14,7 @@ db_config = {
 
 
 
-@given('establecer la conexion')
+@given('establecer la conexion Cassa')
 def establecer_conexion(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
