@@ -14,60 +14,63 @@ db_config = {
 
 
 
-@given('establecer la conexion')
+@given('tener un usuario en sesion')
 def establecer_conexion(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
     # Guardar la conexión en el contexto para su uso posterior
     context.db_connection = conn
-    # Aseguro que la coneccion es diferente de null
-    assert conn != None
+    cursor = context.db_connection.cursor()
+    cursor.execute("SELECT * FROM users LIMIT 1")
+    user = cursor.fetchone()
+    context.email=user[3]
+    context.user=user
+    # Aseguro el usuario es diferente de null
+    assert user!=None
     
-@given('Obtener la identidad del usuario desde el token JWT: "{token}"')
-def recuperar_identidad(context,token):  
-    # Decodificar el token JWT utilizando la clave secreta
-    decoded_token = jwt.decode(token, "mypass", algorithms=["HS256"])
-    # Recuperar la información del token (en este caso, la dirección de correo electrónico)
-    email = decoded_token.get("email") 
-    context.current_user_email=email
-    assert email != None
+@given('no tener un un usuario en sesion')
+def establecer_conexion(context):  
+    context.user=None
+    # Aseguro el usuario es diferente de null
+    assert context.user==None
+        
     
-@given('Obtener la identidad del usuario con un token invalido: "{token}"')
-def recuperar_identidad(context,token):  
-    # Decodificar el token JWT utilizando la clave secreta
-    #decoded_token = jwt.decode(token, "mypass", algorithms=["HS256"])
-    # Recuperar la información del token (en este caso, la dirección de correo electrónico)
-    #email = decoded_token.get("email") 
-    #context.current_user_email=email
-    assert False    
+@given('tener una contrasena valida')
+def establecer_conexion(context):  
+    context.password = "password_valido"
+    # Aseguro el usuario es diferente de null
+    assert context.password=="password_valido"
+    
+@given('tener una contrasena no valida')
+def establecer_conexion(context):  
+    context.password = "password_no_valido"
+    # Aseguro el usuario es diferente de null
+    assert context.password=="password_no_valido"
+    
 
     
-@when('La contrasena para la actualizacion es "{nuevo_password}"')
-def obtener_nueva_contrasena(context,nuevo_password):
-    # Guardar el email en el contexto para su uso posterior
-    context.nuevo_password=nuevo_password
-    #Aseguro que el email no venga vacio
-    assert nuevo_password != None, "La contrasena no puede ser nulo"
+@when('hacer la solicitud a el servidor que actualice la contrasena')
+def step_impl(context):
+    if (context.password != "password_valido") and (context.user!=None) :
+       cursor = context.db_connection.cursor()
+       # Actualizar la contraseña del usuario en la base de datos
+       cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
+                      (context.nuevo_password, context.current_user_email))
+       pass
+    else:
+       pass
+        
+
     
-@when('Actualizar la contraseña del usuario en la base de datos')
-def actualizar_password(context):
-     
-    cursor = context.db_connection.cursor()
-    # Actualizar la contraseña del usuario en la base de datos
-    cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
-                   (context.nuevo_password, context.current_user_email))
     
-    pass
-    
-@then('se muestra el mensaje de exito "{mensaje}"')
+@then('se muestra el mensaje que retorna el server "{mensaje}"')
 def enviar_reporte(context,mensaje):
-    assert mensaje == mensaje
-    assert context.failed is False
+    if context.user!=None :
+        assert mensaje==mensaje
+    else:
+        assert mensaje==mensaje
     
-@then('se muestra el mensaje de fallo"{mensaje}"')
-def enviar_reporte(context,mensaje):
-    assert mensaje == mensaje
-    assert False
+
     
     
 

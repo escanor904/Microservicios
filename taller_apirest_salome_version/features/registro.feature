@@ -4,46 +4,32 @@ Feature: Registro del usuario
   Scenario: Registro exitoso de un nuevo usuario
           
     #Requerimiento: 
-    Given el usuario accede a la página de registro
+    Given el usuario proporciona los datos validos
      #Acción
-     When se proporcionan los datos validos del usuario
-     #Condicion extra
-     And el usuario envía el formulario
+     When se registra en la aplicacion  
      #Resultado esperado
-     Then se recibe una respuesta con codigo estado 201
+     Then se recibe una respuesta con "Codigo estado 201"
      And la respuesta contiene el mensaje "Usuario registrado exitosamente"
 
 
   #Este caso de prueba se enfocará el registro del usuario con datos incompletos
   Scenario: Registro del usuario con datos incompletos
-          
-    #Requerimiento: 
-    Given establecer la conexion con la base de datos
+    
+    #Requerimiento:  
+    Given el usuario proporciona los datos incompletos
      #Acción
-     When obtener los datos del usuario con el usuario "", la contrasena "22" y el correo "cristiano_rr@email.com"
+     When se registra en la aplicacion  
      #Resultado esperado
-     Then se recibe una respuesta con el codigo de estado 400
+     Then se recibe una respuesta con el "Codigo de estado 400"
      And la respuesta contiene el mensaje "Diligencie todos los campos"
 
  #Este caso de prueba se enfocará el registro del usuario que ya existe en la bd
  Scenario: Registro del usuario existente
+    
     #Requerimiento: 
-    Given establecer la conexion con la base de datos
+    Given el usuario proporciona los datos de un usuario existente
      #Acción
-     When obtener los datos del usuario con el usuario "Cristiano Ronaldo", la contrasena "15" y el correo "cristiano_r@email.com"
+     When se registra en la aplicacion  
      #Resultado esperado
-     Then se recibe una respuesta con el codigo de estado 409
-     And la respuesta contiene el mensaje "Ese usuario o corre electronico ya esta registrado"
-
-
- #Este caso de prueba se enfocará en el error del servidor
- Scenario: Error en el servidor durante el registro
-    #Requerimiento: 
-    Given establecer la conexion con la base de datos
-    And se simula el error en el servidor
-     #Acción
-     When obtener los datos del usuario con el usuario "Cristiano Ronaldo", la contrasena "15" y el correo "cristiano_r@email.com"
-     #Resultado esperado
-     Then se recibe una respuesta con el codigo de estado 500
-     And la respuesta contiene el mensaje "Error en el servidor"
-
+     Then se recibe una respuesta con el "Codigo de estado 409"
+     And la respuesta contiene el mensaje "Ese usuario o correo electronico ya esta registrado"

@@ -4,27 +4,21 @@ Feature: Inicio de sesion
   Scenario: Iniciar sesion con las credenciales validas 
           
     #Requerimiento: 
-    Given establecer la conexion con la base de datos
+    Given tener un usuario ya registrado en el sistema
+    And tener la contraseña para el usuario
      #Acción
-     When iniciar sesion con el correo "cristiano_r@email.com" y clave "15"
-     #Condicion extra
-     And Buscar al usuario en la base de datos por su email
-     And Validar la contraseña
+     When realizar la solicitud a la base de datos
      #Resultado esperado
-     Then recibo la respuesta
+     Then se captura el mensaje de respuesta "token:deujde7d6ed7ed57de......  status code:200"
 
 
-
-  #Este caso de prueba se enfocará en que las credenciales son validas
-  #Scenario: Iniciar sesion con las credenciales invalidas
-          
+  Scenario: Iniciar sesion con credenciales invalidas
     #Requerimiento: 
-   # Given establecer la conexion con la base de datos
+    Given tener un usuario ya registrado en el sistema
+    And tener la contraseña para el usuario
      #Acción
-    # When iniciar sesion con el correo "el_bicho@email.com" y clave "15"
-     #Condicion extra
-     #And Buscar al usuario en la base de datos por su email
-     #And Validar la contraseña
+     When realizar la solicitud a la base de datos
      #Resultado esperado
-     #Then recibo la respuesta  
+     Then se captura el mensaje de respuesta ""mensaje": "Credenciales invalidas  status code:400"
+          
 

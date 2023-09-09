@@ -4,41 +4,38 @@ Feature: Restablecimiento de contrasena
   Scenario: Restablecer contrasena con exito
           
     #Requerimiento: 
-    Given cambiar la contrasena con el correo "cristiano_r@email.com", la nueva contrasena "nueva12" 
-    y el token de la sesion iniciada "token"
+    Given el usuario se encuentra ya registrado
      #Acción
-     When tengo un token de restablecimiento válido para el correo electrónico "cristiano_r@email.com"
+     When el usuario proporciona el token, el correo electrónico y una nueva contraseña
      #Condicion extra
-     And el tiempo del token no ha expirado
+     And hacer la solicitud al servidor que actualice la contrasena
      #Resultado esperado
-     Then la respuesta debería tener un código de estado 200
-     And debería recibir un mensaje que dice "Contraseña actualizada exitosamente"
+     Then la respuesta debería tener un "código de estado 200"
+     And se captura el mensaje de respuesta "Contraseña actualizada exitosamente"
 
 
   #Este caso de prueba se enfocará en que el token ya ha expirado
   Scenario: Iniciar sesion con las credenciales invalidas
           
     #Requerimiento: 
-    Given cambiar la contrasena con el correo "cristiano_r@email.com", la nueva contrasena "nueva12" 
-    y el token de la sesion iniciada "token"
+    Given el usuario se encuentra ya registrado
      #Acción
-     When tengo un token de restablecimiento válido para el correo electrónico "cristiano_r@email.com"
+     When el usuario proporciona un token expirado, el correo electrónico y una nueva contraseña
      #Condicion extra
-     And el tiempo del token ha expirado
+     And hacer la solicitud al servidor que actualice la contrasena
      #Resultado esperado
      Then la respuesta debería tener un código de estado 400
-     And debería recibir un mensaje que dice "Token de recuperación inválido o expirado"
+     And debería recibir un mensaje que dice "Token de recuperación expirado"
 
   #Este caso de prueba se enfocará en que el token de restablecimiento no existe o datos incorrectos
-    Scenario: Iniciar sesion con las credenciales invalidas
+    Scenario: Iniciar sesion con las credenciales invalidas o el token no existe
             
     #Requerimiento: 
-    Given cambiar la contrasena con el correo "cristiano_r@email.com", la nueva contrasena "nueva12" 
-     y el token de la sesion iniciada "token"
+    Given el usuario se encuentra ya registrado
      #Acción
-     When tengo un token de restablecimiento invalido para el correo electrónico "cristiano_r@email.com"
+     When el usuario proporciona un token que no existe, el correo electrónico y una nueva contraseña
      #Condicion extra
-     And no tengo un token
+     And hacer la solicitud al servidor que actualice la contrasena
      #Resultado esperado
      Then la respuesta debería tener un código de estado 400
-     And debería recibir un mensaje que dice "No se encontró el token de recuperación"
+     And debería recibir un mensaje que dice "No se encontró el token de recuperación o los datos son invalidos"

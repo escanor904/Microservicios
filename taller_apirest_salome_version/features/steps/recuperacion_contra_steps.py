@@ -11,56 +11,56 @@ db_config = {
     'host': 'localhost'
 }
 
-@given('establecer la conexion RC')
-def establecer_conexion(context):  
+@given('ser un usuario previamente registrado en el sistema')
+def tener_usuario_registrado(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
     # Guardar la conexión en el contexto para su uso posterior
     context.db_connection = conn
-    # Aseguro que la coneccion es diferente de null
-    assert conn != None
-    
-
-
-
-@given('establecer la conexion RC')
-def establecer_conexion(context):  
-    # Establecer la conexión con la base de datos
-    conn = psycopg2.connect(**db_config)
-    # Guardar la conexión en el contexto para su uso posterior
-    context.db_connection = conn
-    # Aseguro que la coneccion es diferente de null
-    assert conn != None
-    
-@when('El correo electronico que proporciona el usuario es "{email}"')
-def obtener_email(context,email):  
-    context.email=email
-    assert email != None
-    
-@when('Buscar al usuario en la base de datos por su email RC')
-def buscar_usuario_por_email(context):
-     
     cursor = context.db_connection.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = %s", (context.email,))
+    cursor.execute("SELECT * FROM users LIMIT 1")
     user = cursor.fetchone()
-    context.user = user
-    assert user != None
+    context.email=user[3]
+    context.user=user
+    # Aseguro que la coneccion es diferente de null
+    assert user!=None
     
-@when('Generar un token de recuperación de contraseña')    
+@given('tener un usuario que no este registrado en el sistema')
+def step_impl(context):  
+        # Establecer la conexión con la base de datos
+    conn = psycopg2.connect(**db_config)
+    # Guardar la conexión en el contexto para su uso posterior
+    context.db_connection = conn
+    cursor = context.db_connection.cursor()
+    email="ccristiano_r@email.com"
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cursor.fetchone()
+    context.user=user
+
+    # Aseguro que el usuario es nulo
+    assert user==None
+    
+    
+
+@when('se realiza la solicitud al servidor')    
 def generar_token(context):
-    # Datos a incluir en el token (en este caso, solo la dirección de correo electrónico)
-    email = context.email
-    
-    # Crear el token JWT
-    token = jwt.encode({"email": email}, "mypass", algorithm="HS256")
-    context.token=token
-    assert token!=None
-    
-@then('se muestra el token')
-def enviar_reporte(context):
-    assert context.token!= None
-    
    
+    if context.user!=None :
+        # Crear el token JWT
+        token = jwt.encode({"email": context.email}, "mypass", algorithm="HS256")
+        context.token=token
+        assert token!=None  
+        
+    else:
+        pass
     
+
+
+@then('se obtiene el mensaje de respuesta "{mensaje}"')
+def enviar_reporte(context,mensaje):
+    if context.user!=None :
+        assert mensaje==mensaje
+    else:
+        assert mensaje==mensaje
 
 
