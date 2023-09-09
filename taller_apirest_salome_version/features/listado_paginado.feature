@@ -6,9 +6,9 @@ Feature: Listado de usuarios paginados
     #Requerimiento: 
     Given establecer la conexion con la base de datos
      #Acción
-     When obtener los parametros de paginacion "1" y tamaño "2"
+     When proporcionar parametros de paginacion "1" y tamaño "2"
      #Resultado esperado
-     Then se recibe una respuesta con código de estado 200
+     Then se recibe una respuesta con "Código de estado 200"
      And la respuesta contiene una lista de 2 usuarios 
 
 
@@ -18,9 +18,9 @@ Feature: Listado de usuarios paginados
     #Requerimiento: 
     Given establecer la conexion con la base de datos
      #Acción
-     When obtener los parametros de paginacion "" y tamaño ""
+     When proporcionar los parametros de paginacion "" y tamaño ""
      #Resultado esperado
-     Then se recibe una respuesta con código de estado 200
+     Then se recibe una respuesta con "Código de estado 400"
      And la respuesta contiene una lista de 2 usuarios 
 
 
@@ -30,9 +30,9 @@ Feature: Listado de usuarios paginados
     #Requerimiento: 
     Given establecer la conexion con la base de datos
      #Acción
-     When obtener los parametros de paginacion "1" y tamaño "-2"
+     When proporcionar los parametros de paginacion "1" y tamaño "-2"
      #Resultado esperado
-     Then se recibe una respuesta con código de estado 400
+     Then se recibe una respuesta con "Código de estado 400"
      And la respuesta contiene una lista de "Paginacion invalida"
 
 
