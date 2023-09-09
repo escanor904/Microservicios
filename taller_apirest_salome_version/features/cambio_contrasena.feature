@@ -7,7 +7,7 @@ Feature: Cambio de contrasena
     Given tener un usuario en sesion
     And tener una contrasena valida
      #Acción
-     When hacer la solicitud a el servidor que actualice la contrasena
+     When hacer la solicitud a el servidor que actualice la contrasena en la base de datos
      #Resultado esperado
      Then se muestra el mensaje que retorna el server "Contraseña actualizada exitosamente    status code:200"
 
@@ -18,7 +18,7 @@ Feature: Cambio de contrasena
     Given no tener un un usuario en sesion
     And tener una contrasena no valida
      #Acción
-     When hacer la solicitud a el servidor que actualice la contrasena
+     When hacer la solicitud a el servidor que actualice la contrasena en la base de datos
      #Resultado esperado
      Then se muestra el mensaje que retorna el server "error     status code:400"   
 

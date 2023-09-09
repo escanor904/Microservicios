@@ -31,29 +31,25 @@ def establecer_conexion(context):
 @given('no tener un un usuario en sesion')
 def establecer_conexion(context):  
     context.user=None
-    # Aseguro el usuario es diferente de null
     assert context.user==None
         
     
 @given('tener una contrasena valida')
 def establecer_conexion(context):  
     context.password = "password_valido"
-    # Aseguro el usuario es diferente de null
     assert context.password=="password_valido"
     
 @given('tener una contrasena no valida')
 def establecer_conexion(context):  
     context.password = "password_no_valido"
-    # Aseguro el usuario es diferente de null
     assert context.password=="password_no_valido"
     
 
     
-@when('hacer la solicitud a el servidor que actualice la contrasena')
+@when('hacer la solicitud a el servidor que actualice la contrasena en la base de datos')
 def step_impl(context):
     if (context.password != "password_valido") and (context.user!=None) :
        cursor = context.db_connection.cursor()
-       # Actualizar la contraseña del usuario en la base de datos
        cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
                       (context.nuevo_password, context.current_user_email))
        pass
