@@ -11,10 +11,7 @@ db_config = {
     'host': 'localhost'
 }
 
-
-
-
-@given('tener un usuario en sesion')
+@given('tener un usuario en una sesion')
 def establecer_conexion(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
@@ -28,30 +25,34 @@ def establecer_conexion(context):
     # Aseguro el usuario es diferente de null
     assert user!=None
     
-@given('no tener un un usuario en sesion')
+@given('no tener un usuario en sesion')
 def establecer_conexion(context):  
     context.user=None
+    # Aseguro el usuario es diferente de null
     assert context.user==None
         
     
-@given('tener una contrasena valida')
+@given('tener un correo valido')
 def establecer_conexion(context):  
-    context.password = "password_valido"
-    assert context.password=="password_valido"
+    context.email = "email_valido@email.com"
+    # Aseguro el usuario es diferente de null
+    assert context.email=="email_valido@email.com"
     
-@given('tener una contrasena no valida')
+@given('tener un correo no valido')
 def establecer_conexion(context):  
-    context.password = "password_no_valido"
-    assert context.password=="password_no_valido"
+    context.email = "email_novalido@enail.com"
+    # Aseguro el usuario es diferente de null
+    assert context.email=="email_novalido@enail.com"
     
 
     
-@when('hacer la solicitud a el servidor que actualice la contrasena en la base de datos')
+@when('hacer la solicitud al servidor que actualice el correo')
 def step_impl(context):
-    if (context.password != "password_valido") and (context.user!=None) :
+    if (context.email != "email_valido@email.com") and (context.user!=None) :
        cursor = context.db_connection.cursor()
-       cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
-                      (context.nuevo_password, context.current_user_email))
+       # Actualizar la contraseña del usuario en la base de datos
+       cursor.execute("UPDATE users SET email = %s WHERE email = %s",
+                       (context.new_email, context.current_user_email))
        pass
     else:
        pass
@@ -59,7 +60,7 @@ def step_impl(context):
 
     
     
-@then('se muestra el mensaje que retorna el server "{mensaje}":')
+@then('se muestra el mensaje que retorna el server "{mensaje}"')
 def enviar_reporte(context,mensaje):
     if context.user!=None :
         assert mensaje==mensaje

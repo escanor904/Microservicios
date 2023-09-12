@@ -11,10 +11,7 @@ db_config = {
     'host': 'localhost'
 }
 
-
-
-
-@given('tener un usuario en sesion')
+@given('tener usuario en una sesion')
 def establecer_conexion(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
@@ -23,51 +20,31 @@ def establecer_conexion(context):
     cursor = context.db_connection.cursor()
     cursor.execute("SELECT * FROM users LIMIT 1")
     user = cursor.fetchone()
+    context.user_id=user[0]
     context.email=user[3]
     context.user=user
     # Aseguro el usuario es diferente de null
     assert user!=None
-    
-@given('no tener un un usuario en sesion')
+
+@given('no tener usuario en sesion')
 def establecer_conexion(context):  
     context.user=None
+    # Aseguro el usuario es diferente de null
     assert context.user==None
-        
-    
-@given('tener una contrasena valida')
-def establecer_conexion(context):  
-    context.password = "password_valido"
-    assert context.password=="password_valido"
-    
-@given('tener una contrasena no valida')
-def establecer_conexion(context):  
-    context.password = "password_no_valido"
-    assert context.password=="password_no_valido"
-    
 
-    
-@when('hacer la solicitud a el servidor que actualice la contrasena en la base de datos')
+@when('hacer la solicitud al servidor que elimine el usuario')
 def step_impl(context):
-    if (context.password != "password_valido") and (context.user!=None) :
+    if (context.user!=None):
        cursor = context.db_connection.cursor()
-       cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
-                      (context.nuevo_password, context.current_user_email))
+        # Eliminar al usuario de la base de datos
+       cursor.execute("DELETE FROM users WHERE user_id = %s", (context.user_id,))
        pass
     else:
        pass
-        
 
-    
-    
-@then('se muestra el mensaje que retorna el server "{mensaje}":')
+@then('le muestra el mensaje que retorna el server "{mensaje}"')
 def enviar_reporte(context,mensaje):
     if context.user!=None :
         assert mensaje==mensaje
     else:
         assert mensaje==mensaje
-    
-
-    
-    
-
-

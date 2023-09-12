@@ -4,24 +4,18 @@ Feature: Obtencion de usuarios
     Scenario: Obtener los datos del usuario con una id valida
 
         #Requerimiento:
-        Given establecer la conexion DB
-        And obtener la informacion del usuario
+        Given obtener la informacion del usuario existente
             #Acción
-            When el id es de un usuario existente
-            #Condicion extra
-            And envio su id
+            When se verifica el id
             #Resultado esperado
-            Then recibo la informacion del usuario
+            Then mostrar el mensaje del servidor "{user}"
 
     #Este caso se basa en que se haya seleccionado un usuario con id no es valida
     Scenario: Obtener los datos del usuario con una id invalidas
 
         #Requerimiento:
-        Given establecer la conexion DB
-        And obtener mensaje de usuario no valido
+        Given obtener la informacion del usuario no existente
             #Acción
-            When el id del usuario no es valido
-            #Condicion extra
-            And envio su id
+            When se verifica el id
             #Resultado esperado
-            Then se muestra el mensaje de "Usuario no valido"
+            Then mostrar el mensaje del servidor "err   505"

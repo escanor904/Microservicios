@@ -8,7 +8,7 @@ Feature: Registro del usuario
      #Acción
      When se registra en la aplicacion  
      #Resultado esperado
-     Then se recibe una respuesta con "Codigo estado 201"
+     Then se recibe una respuesta con el "Codigo estado 201"
      And la respuesta contiene el mensaje "Usuario registrado exitosamente"
 
 

@@ -30,34 +30,39 @@ def datos_usuario(context):
     context.email = "cristian_r@email.com"
     context.new_password = "password_nueva"
     
+@when('el usuario proporciona un token expirado, el correo electrónico y una nueva contraseña')
+def datos_usuario(context):
+    context.token = "ahfbasfajfb13413"
+    context.email = "cristian_r@email.com"
+    context.new_password = "password_nueva"
 
-@when('hacer la solicitud a el servidor que actualice la contrasena')
-def step_impl(context):
-    if (context.password != "password_valido") and (context.user!=None) :
-       cursor = context.db_connection.cursor()
-       # Actualizar la contraseña del usuario en la base de datos
-       cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
-                      (context.nuevo_password, context.current_user_email))
-       pass
+@when('el usuario proporciona un token que no existe, el correo electrónico y una nueva contraseña')
+def datos_usuario(context):
+    context.token = "ahfbasfajfb13413"
+    context.email = "cristian_r@email.com"
+    context.new_password = "password_nueva"
+
+@when('hacer la solicitud al servidor que actualice la contrasena')
+def solictud_servidor(context):
+    if (context.new_password != "password_valido") and (context.user!=None) :
+        cursor = context.db_connection.cursor()
+        # Actualizar la contraseña del usuario en la base de datos
+        cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
+                       (context.new_password , context.email))
+        pass
     else:
-       pass
+        pass
         
-
-@then('la respuesta debería tener un código de estado  "{codigo}"')
-def enviar_reporte(context,codigo):
+        
+        
+@then('la respuesta debería tener un "{codigo}"') 
+def enviar_reporte_codigo_res(context,codigo):
     if context.user == 1 :
         assert codigo==codigo
     else:
         assert codigo==codigo
 
-        
 @then('se captura el mensaje de respuesta "{mensaje}"')
-def enviar_reporte(context,mensaje):
-    if context.salida == 1 :
-        assert mensaje==mensaje
-    else:
-        assert mensaje==mensaje
-            
-        
-        
-
+def enviar_reporte_mensaje_res(context,mensaje):
+    assert mensaje==mensaje
+    
