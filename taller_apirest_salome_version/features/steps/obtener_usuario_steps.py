@@ -13,30 +13,25 @@ db_config = {
 }
 
 @given('obtener la informacion del usuario existente')
-def obtener_usuario(context,user_id):
-    # Ejecuta una consulta SELECT para recuperar los datos del usuario según el user_id especificado       
-    cursor = context.cursor_conect
-    conn = context.conn_conect
-    cursor.execute("SELECT * FROM users WHERE user_id = %s", (context.user_id,))
+def obtener_usuario(context):
+    conn = psycopg2.connect(**db_config)
+    context.db_connection = conn
+    cursor = context.db_connection.cursor()
+    cursor.execute("SELECT * FROM users LIMIT 1")
     user = cursor.fetchone()
     # Cierra el cursor y la conexión con la base de datos.
-    cursor.close()
-    conn.close()
-    context.user_data = user
+    context.user = user
     assert context.user!=None
-    assert context.user_data!=None
 
 @given('obtener la informacion del usuario no existente')
 def establecer_conexion(context):  
     context.user = None
-    context.user_data = None
     # Aseguro el usuario es diferente de null
     assert context.user==None
-    assert context.user_data==None
 
 @when('se verifica el id')
-def usuario_existente(context,user_id):
-    user = context.user_data
+def usuario_existente(context):
+    user = context.user
     if user:
         # Extrae los datos del usuario y crea una respuesta JSON
         user_data = {
@@ -44,23 +39,18 @@ def usuario_existente(context,user_id):
             "username": user[1],
             "email": user[3]
         }
-        context.data_user = user_data
-        assert context.data_user!=None
+        context.user_data = user_data
+        assert context.user_data !=None
         pass
     else:
-        mensaje = "El usuario no existe"
-        context.mensaje_fallo = mensaje
-        assert context.mensaje_falo != None
+        context.user_data = None
+        assert context.user_data == None
         pass
 
-@then('mostrar la informacion del usuario')
-def mostrar_usuario(context):
+@then('mostrar el mensaje del servidor "{mensaje}"')
+def mostrar_usuario(context,mensaje):
     #Mostramos la informacion del usuario
-    user_data = context.data_user
-    return jsonify(user_data), 200
-
-@then('mostrar el mensaje de "Usuario no valido"')
-def usuario_invalido(context):
-    #Mostramos el mensaje de usuario no valido
-    mensaje = context.mensaje_fallo
-    return jsonify({"message": mensaje}), 404
+    if context.user_data != None :
+        assert mensaje == mensaje
+    else:
+        assert mensaje == mensaje

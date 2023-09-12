@@ -8,7 +8,7 @@ Feature: Obtencion de usuarios
             #Acción
             When se verifica el id
             #Resultado esperado
-            Then mostrar la informacion del usuario
+            Then mostrar el mensaje del servidor "{user}"
 
     #Este caso se basa en que se haya seleccionado un usuario con id no es valida
     Scenario: Obtener los datos del usuario con una id invalidas
@@ -18,4 +18,4 @@ Feature: Obtencion de usuarios
             #Acción
             When se verifica el id
             #Resultado esperado
-            Then mostrar el mensaje de "Usuario no valido"
+            Then mostrar el mensaje del servidor "err   505"
