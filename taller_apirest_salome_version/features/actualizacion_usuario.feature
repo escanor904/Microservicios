@@ -1,4 +1,4 @@
-Feature: Obtencion de usuarios
+Feature: actualización de usuarios
 
     #Este caso de prueba se enfocará en que las credenciales son validas
     Scenario: Obtener los datos del usuario con una id valida

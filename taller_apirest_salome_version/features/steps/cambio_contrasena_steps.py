@@ -63,7 +63,7 @@ def step_impl(context):
 
     
     
-@then('se muestra el mensaje que retorna el server "{mensaje}"')
+@then('se muestra el mensaje que retorna el server "{mensaje}":')
 def enviar_reporte(context,mensaje):
     if context.user!=None :
         assert mensaje==mensaje

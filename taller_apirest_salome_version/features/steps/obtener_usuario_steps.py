@@ -17,7 +17,7 @@ def obtener_usuario(context,user_id):
     # Ejecuta una consulta SELECT para recuperar los datos del usuario según el user_id especificado       
     cursor = context.cursor_conect
     conn = context.conn_conect
-    cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+    cursor.execute("SELECT * FROM users WHERE user_id = %s", (context.user_id,))
     user = cursor.fetchone()
     # Cierra el cursor y la conexión con la base de datos.
     cursor.close()
@@ -35,7 +35,7 @@ def establecer_conexion(context):
     assert context.user_data==None
 
 @when('se verifica el id')
-def usuario_existente(context):
+def usuario_existente(context,user_id):
     user = context.user_data
     if user:
         # Extrae los datos del usuario y crea una respuesta JSON
@@ -45,9 +45,13 @@ def usuario_existente(context):
             "email": user[3]
         }
         context.data_user = user_data
+        assert context.data_user!=None
+        pass
     else:
         mensaje = "El usuario no existe"
         context.mensaje_fallo = mensaje
+        assert context.mensaje_falo != None
+        pass
 
 @then('mostrar la informacion del usuario')
 def mostrar_usuario(context):
