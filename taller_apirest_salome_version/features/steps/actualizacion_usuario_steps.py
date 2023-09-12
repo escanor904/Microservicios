@@ -11,10 +11,7 @@ db_config = {
     'host': 'localhost'
 }
 
-
-
-
-@given('tener un usuario en sesion')
+@given('tener un usuario en una sesion')
 def establecer_conexion(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
@@ -28,20 +25,20 @@ def establecer_conexion(context):
     # Aseguro el usuario es diferente de null
     assert user!=None
     
-@given('no tener un un usuario en sesion')
+@given('no tener un usuario en sesion')
 def establecer_conexion(context):  
     context.user=None
     # Aseguro el usuario es diferente de null
     assert context.user==None
         
     
-@given('tener una contrasena valida')
+@given('tener un correo valido')
 def establecer_conexion(context):  
     context.email = "email_valido@email.com"
     # Aseguro el usuario es diferente de null
     assert context.email=="email_valido@email.com"
     
-@given('tener una contrasena no valida')
+@given('tener un correo no valido')
 def establecer_conexion(context):  
     context.email = "email_novalido@enail.com"
     # Aseguro el usuario es diferente de null
@@ -49,7 +46,7 @@ def establecer_conexion(context):
     
 
     
-@when('hacer la solicitud a el servidor que actualice el correo')
+@when('hacer la solicitud al servidor que actualice el correo')
 def step_impl(context):
     if (context.email != "email_valido@email.com") and (context.user!=None) :
        cursor = context.db_connection.cursor()
@@ -63,7 +60,7 @@ def step_impl(context):
 
     
     
-@then('se muestra el mensaje que retorna el server "{mensaje}"')
+@then('se muestra el mensaje que retorna el server "{mensaje}":')
 def enviar_reporte(context,mensaje):
     if context.user!=None :
         assert mensaje==mensaje

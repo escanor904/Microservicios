@@ -12,15 +12,7 @@ db_config = {
     'host': 'localhost'
 }
 
-@given('establecer la conexion')
-def seleccionar_usuario(context):
-    #Establecer la conexion con la base de datos
-    conn = psycopg2.connect(**db_config)
-    cursor = conn.cursor()
-    context.conn_conect = conn
-    context.cursor_conect = cursor
-
-@given('obtener la informacion del usuario desde su id: "{user_id}"')
+@given('obtener la informacion del usuario existente')
 def obtener_usuario(context,user_id):
     # Ejecuta una consulta SELECT para recuperar los datos del usuario según el user_id especificado       
     cursor = context.cursor_conect
@@ -31,8 +23,18 @@ def obtener_usuario(context,user_id):
     cursor.close()
     conn.close()
     context.user_data = user
+    assert context.user!=None
+    assert context.user_data!=None
 
-@when('id de un usuario existente')
+@given('obtener la informacion del usuario no existente')
+def establecer_conexion(context):  
+    context.user = None
+    context.user_data = None
+    # Aseguro el usuario es diferente de null
+    assert context.user==None
+    assert context.user_data==None
+
+@when('se verifica el id')
 def usuario_existente(context):
     user = context.user_data
     if user:
@@ -53,7 +55,7 @@ def mostrar_usuario(context):
     user_data = context.data_user
     return jsonify(user_data), 200
 
-@then('mostrar mensaje de usuario no valido')
+@then('mostrar el mensaje de "Usuario no valido"')
 def usuario_invalido(context):
     #Mostramos el mensaje de usuario no valido
     mensaje = context.mensaje_fallo

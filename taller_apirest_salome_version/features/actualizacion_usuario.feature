@@ -4,7 +4,7 @@ Feature: Obtencion de usuarios
     Scenario: Obtener los datos del usuario con una id valida
 
         #Requerimientos:
-        Given tener un usuario en sesion
+        Given tener un usuario en una sesion
         And tener un correo valido
             #Acción
             When hacer la solicitud al servidor que actualice el correo

@@ -6,9 +6,7 @@ Feature: Obtencion de usuarios
         #Requerimiento:
         Given obtener la informacion del usuario existente
             #Acción
-            When el id es de un usuario existente
-            #Condicion extra
-            And envio su id
+            When se verifica el id
             #Resultado esperado
             Then mostrar la informacion del usuario
 
@@ -18,8 +16,6 @@ Feature: Obtencion de usuarios
         #Requerimiento:
         Given obtener la informacion del usuario no existente
             #Acción
-            When el id del usuario no es valido
-            #Condicion extra
-            And envio su id
+            When se verifica el id
             #Resultado esperado
             Then mostrar el mensaje de "Usuario no valido"
