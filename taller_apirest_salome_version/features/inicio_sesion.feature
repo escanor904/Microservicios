@@ -1,24 +1,28 @@
 Feature: Inicio de sesion
 
-  #Este caso de prueba se enfocará en que las credenciales son validas
-  Scenario: Iniciar sesion con las credenciales validas 
-          
+
+  Scenario: Se valida el usuario 
+
     #Requerimiento: 
-    Given tener un usuario ya registrado en el sistema
-    And tener la contraseña para el usuario
+    #tener un usuario previamente registrado
+
+     Given tener un usuario previamente registrado en el sistema
+     And tener la contraseña para el usuario
      #Acción
-     When realizar la solicitud a la base de datos
-     #Resultado esperado
-     Then se captura el mensaje de respuesta "token:deujde7d6ed7ed57de......  status code:200"
+     When se realiza la solicitud al servidor 
+     #Condicion extra
+     #lo que se espera
+     Then se libera el mensaje de respuesta "status code:200"
 
 
-  Scenario: Iniciar sesion con credenciales invalidas
-    #Requerimiento: 
-    Given tener un usuario ya registrado en el sistema
+
+
+  Scenario: No se valida el usuario 
+    
+    Given no tener un usuario que no este registrado en el sistema
     And tener la contraseña para el usuario
-     #Acción
-     When realizar la solicitud a la base de datos
-     #Resultado esperado
-     Then se captura el mensaje de respuesta ""mensaje": "Credenciales invalidas  status code:400"
-          
+     #Accion
+     When se realiza la solicitud al servidor
+     #lo que se espera
+     Then se libera el mensaje de respuesta "status code:400"
 
