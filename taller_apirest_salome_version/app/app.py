@@ -33,7 +33,7 @@ def inicio_sesion():
         # valida la respuesta
         jsonschema.validate(schema,api_response)
         
-            # Establecer una conexión con la base de datos PostgreSQL
+        # Establecer una conexión con la base de datos PostgreSQL
         conn = psycopg2.connect(**db_config)
         cursor = conn.cursor()
 
