@@ -30,8 +30,10 @@ def inicio_sesion():
           schema = json.load(schema_file)
         # obtiene el JSON de respuesta
         api_response=request.get_json()
+
         # valida la respuesta
         jsonschema.validate(schema,api_response)
+       
         
         # Establecer una conexión con la base de datos PostgreSQL
         conn = psycopg2.connect(**db_config)
@@ -61,9 +63,11 @@ def inicio_sesion():
 
         return jsonify({"mensaje": "Credenciales invalidas"}), 401
         
-    except jsonschema.exceptions.ValidationError as e:
-        print("La respuesta no cumple con el JSON Schema:")
-        print(e)
+    #except jsonschema.exceptions.ValidationError as e:
+    except Exception as e:
+        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
+        #print("La respuesta no cumple con el JSON Schema:")
+        #print(e)
             
 
 #--------------------------------------CAMBIAR CONTRASEÑA------------------------
@@ -71,64 +75,99 @@ def inicio_sesion():
 @jwt_required()
 def cambio_contrasena():
     
-    # Establecer una conexión con la base de datos PostgreSQL
-    conn = psycopg2.connect(**db_config)
-    cursor = conn.cursor()
-    
-    # Obtener la identidad del usuario desde el token JWT
-    current_user_email = get_jwt_identity()
+    try:
+        # Cargar el JSON Schema
+        ruta_relativa= "../taller_apirest_salome_version/schems/cambio_contra_schema.json"
+        with open(ruta_relativa, 'r') as schema_file:
+          schema = json.load(schema_file)
+          
+         # obtiene el JSON de respuesta
+        api_response=request.get_json()
 
-    # Obtener los datos de la nueva contraseña desde la carga JSON de la solicitud HTTP
-    data = request.get_json()
-    new_password = data['new_password']
+        # valida la respuesta
+        jsonschema.validate(schema,api_response)
+        
+        # Establecer una conexión con la base de datos PostgreSQL
+        conn = psycopg2.connect(**db_config)
+        cursor = conn.cursor()
+    
+        # Obtener la identidad del usuario desde el token JWT
+        current_user_email = get_jwt_identity()
+
+        # Obtener los datos de la nueva contraseña desde la carga JSON de la solicitud HTTP
+        data = request.get_json()
+        new_password = data['new_password']
 
     
-    # Actualizar la contraseña del usuario en la base de datos
-    cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
+        # Actualizar la contraseña del usuario en la base de datos
+        cursor.execute("UPDATE users SET hashed_password = %s WHERE email = %s",
                    (new_password, current_user_email))
 
-    # Confirmar la transacción y cerrar el cursor y la conexión
-    conn.commit()
-    cursor.close()
-    conn.close()
+        # Confirmar la transacción y cerrar el cursor y la conexión
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-    return jsonify({"mensaje": "Contrasena actualizada exitosamente"}), 200
+        return jsonify({"mensaje": "Contrasena actualizada exitosamente"}), 200
+         
+    except Exception as e:
+        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
+        #print("La respuesta no cumple con el JSON Schema:")
+        #print(e)
     
-
+    
 
 #--------------------------------------RECUPERAR CLAVE---------------------------
 # Ruta para solicitar recuperación de contraseña
 @app.route('/recuperacion_contra', methods=['POST'])
 def recuperacion_contrasena():
-    # Establecer una conexión con la base de datos PostgreSQL
-    conn = psycopg2.connect(**db_config)
-    cursor = conn.cursor()
     
-    # Obtener el correo electrónico proporcionado por el usuario
-    data = request.get_json()
-    email = data['email']
+    try:
+        # Cargar el JSON Schema
+        ruta_relativa= "../taller_apirest_salome_version/schems/recuperacion_contra_schema.json"
+        with open(ruta_relativa, 'r') as schema_file:
+          schema = json.load(schema_file)
+          
+         # obtiene el JSON de respuesta
+        api_response=request.get_json()
+
+        # valida la respuesta
+        jsonschema.validate(schema,api_response)
+        # Establecer una conexión con la base de datos PostgreSQL
+        conn = psycopg2.connect(**db_config)
+        cursor = conn.cursor()
     
-    # Buscar al usuario en la base de datos por su email
-    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-    user = cursor.fetchone()
+        # Obtener el correo electrónico proporcionado por el usuario
+        data = request.get_json()
+        email = data['email']
     
-    # Verificar si la variable no es nula, esto asegura que si encontro un usuario
-    if user != None:
+        # Buscar al usuario en la base de datos por su email
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
+    
+        # Verificar si la variable no es nula, esto asegura que si encontro un usuario
+        if user != None:
        
            # Generar un token de recuperación de contraseña
-        reset_token = ''.join(choices(ascii_letters + digits, k=20))
-        # Le da un tiempo al token
-        expiration_time = datetime.now() + timedelta(minutes=30)
-        reset_tokens[email] = {'token': reset_token, 'expiration_time': expiration_time}
-        # reset_token  # Almacenar el token en el almacén temporal
+           reset_token = ''.join(choices(ascii_letters + digits, k=20))
+           # Le da un tiempo al token
+           expiration_time = datetime.now() + timedelta(minutes=30)
+           reset_tokens[email] = {'token': reset_token, 'expiration_time': expiration_time}
+           # reset_token  # Almacenar el token en el almacén temporal
 
-        # En un escenario real, se debería enviar un correo electrónico con un enlace que contenga el token
-        # Aquí solo mostramos el token generado para fines de demostración
-        return jsonify({"mensaje": "Se ha generado un token de recuperacion", "token": reset_token}), 200
+           # En un escenario real, se debería enviar un correo electrónico con un enlace que contenga el token
+           # Aquí solo mostramos el token generado para fines de demostración
+           return jsonify({"mensaje": "Se ha generado un token de recuperacion", "token": reset_token}), 200
     
-    else:
-    # La variable es nula, puedes manejar este caso aquí
-        return jsonify({"mensaje": "No existe ningún registro correspondiente a este usuario en la base de datos"}), 401
+        else:
+        # La variable es nula, puedes manejar este caso aquí
+           return jsonify({"mensaje": "No existe ningún registro correspondiente a este usuario en la base de datos"}), 401
+       
+    except Exception as e:
+        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
+        #print("La respuesta no cumple con el JSON Schema:")
+        #print(e)
+
 
 
 #-------------------------------------RESTABLECIMIENTO CONTRASEÑA-------------------------------------
