@@ -170,15 +170,23 @@ def restablecemiento_contrasena():
 # Definición de una ruta para listar todos los usuarios por paginacion
 @app.route('/users', methods=['GET'])
 def list_users():
-   
-    try:
+    try:                                                                                    
         # Realiza la conexión con la base de datos
         conn = psycopg2.connect(**db_config)
         cursor = conn.cursor()
 
         # Obtén los parámetros de paginación de la solicitud (por defecto, página 1 y tamaño de página 10)
-        page_number = int(request.args.get('page', 1))
-        page_size = int(request.args.get('size', 10))
+        page_param = request.args.get('page', '1')
+        size_param = request.args.get('size', '10')
+
+       # Valida si los parámetros son números positivos o utiliza valores predeterminados si no se proporcionan o son inválidos
+        try:
+            page_number = max(int(page_param), 1)
+            page_size = max(int(size_param), 1)
+        except ValueError:
+            # En caso de que los parámetros no sean números válidos, usa valores predeterminados
+            page_number = 1
+            page_size = 10
 
         # Calcula el índice de inicio y fin para la paginación
         start_index = (page_number - 1) * page_size
