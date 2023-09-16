@@ -4,7 +4,8 @@ from jsonschema import validate
 from faker import Faker
 
 # Cargar el esquema JSON desde el archivo "registro_schema.json"
-with open("registro_schema.json", "r") as schema_file:
+#taller_apirest_salome_version/schems/registro_schema.json
+with open("../schems/registro_schema.json", "r") as schema_file:
     schema = json.load(schema_file)
 
 # Crea una instancia de Faker
