@@ -10,21 +10,17 @@ db_config = {
     'host': 'localhost'
 }
 
-@given('tener al menos registrado los usuarios que va a consultar')
-def registros_bd(context):  
+@given('establecer la conexion con la base de datos')
+def establecer_conexion_bd(context):  
     # Establecer la conexión con la base de datos
     conn = psycopg2.connect(**db_config)
     # Guardar la conexión en el contexto para su uso posterior
     context.db_connection = conn
     cursor = context.db_connection.cursor()
-
-    # Ejecutar una consulta para seleccionar al menos un usuario
-    cursor.execute("SELECT * FROM users LIMIT 1")
+    cursor.execute("SELECT * FROM users")
     user = cursor.fetchone()
-    if user:
-        context.email = user[3]
-        context.user = user
-    cursor.close()
+    context.email=user[3]
+    context.user=user
 
 
 @when('proporcionar los parametros de paginacion {pagina} con un tamaño de página de {tamano_pagina}')

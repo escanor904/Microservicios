@@ -4,7 +4,7 @@ Feature: Listado de usuarios paginados
   Scenario: Listar usuarios paginados exitosamente
           
     #Requerimiento: 
-    Given tener al menos registrado los usuarios que va a consultar
+    Given establecer la conexion con la base de datos
      #Acción
      When proporcionar los parametros de paginacion 1 con un tamaño de página de 2
      #Resultado esperado
@@ -16,7 +16,7 @@ Feature: Listado de usuarios paginados
   Scenario: Listar usuarios sin parametros de paginacion
           
     #Requerimiento: 
-    Given tener al menos registrado los usuarios que va a consultar
+    Given establecer la conexion con la base de datos
      #Acción
      When proporcionar los parametros de paginacion 0 con un tamaño de página de 0
      #Resultado esperado
@@ -28,7 +28,7 @@ Feature: Listado de usuarios paginados
   Scenario: Listar usuarios con paginacion inválida
           
     #Requerimiento: 
-    Given tener al menos registrado los usuarios que va a consultar
+    Given establecer la conexion con la base de datos
      #Acción
      When proporcionar los parametros de paginacion 1 con un tamaño de página de -2
      #Resultado esperado

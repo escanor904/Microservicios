@@ -5,10 +5,6 @@ info:  # Información general sobre la API
   description: An API for user authentication and password recovery  # Descripción de la API
   version: 1.0.0  # Versión de la API
 
-servers:
-  - url: http://localhost:5000
-
-
 paths:
   # Ruta del endpoint: /login
   /inicio_sesion:
