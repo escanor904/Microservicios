@@ -31,6 +31,3 @@ try:
 except jsonschema.exceptions.ValidationError as e:
     print("Error de validación del esquema JSON:")
     print(e)
-
-
-    
