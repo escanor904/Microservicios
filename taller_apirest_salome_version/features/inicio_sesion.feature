@@ -13,11 +13,12 @@ Feature: Inicio de sesion
      #Condicion extra
      #lo que se espera
      Then se libera el mensaje de respuesta "status code:200"
+     And la estructura de la respuesta es "correcta"
 
 
 
 
-  Scenario: No se valida el usuario 
+  Scenario: No sea valido el usuario 
     
     Given no tener un usuario que no este registrado en el sistema
     And tener la contraseña para el usuario
@@ -25,4 +26,5 @@ Feature: Inicio de sesion
      When se realiza la solicitud al servidor
      #lo que se espera
      Then se libera el mensaje de respuesta "status code:400"
+     And la estructura de la respuesta es "erronea"
 
