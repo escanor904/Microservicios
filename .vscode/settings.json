@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./taller_logs_centralizados/punto_2/productor"
+    ]
+}

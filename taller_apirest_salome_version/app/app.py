@@ -1,13 +1,16 @@
 from flask import Flask, request, jsonify
-import psycopg2,  jsonschema, json
+import psycopg2,  jsonschema, json, sys
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from random import choices
 from string import ascii_letters, digits
 from datetime import datetime, timedelta
 from config import db_config , DevelopmentConfig
 
+# Agregar la ubicación de la carpeta 'productor' al sys.path
+sys.path.append('../taller_logs_centralizados/punto_2')
 
-
+# Ahora puedes importar el módulo 
+import productor
 
 
 app = Flask(__name__)
@@ -51,6 +54,10 @@ def inicio_sesion():
         if user and user[2] == password:  # Verificar contraseña (esto debe ser un hash en la vida real)
            # Generar un token JWT
            access_token = create_access_token(identity=email)
+           
+           # Enviar un mensaje a Kafka indicando que el usuario se autenticó
+           productor.enviar_mensaje_autenticacion(email)
+           
            # Cerrar el cursor y la conexión
            cursor.close()
            conn.close()
