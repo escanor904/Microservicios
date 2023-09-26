@@ -1,68 +1,90 @@
-# import logging
-# from json import loads
+from flask import Flask, request, jsonify
+import psycopg2,  jsonschema, json, sys
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from random import choices
+from string import ascii_letters, digits
+from datetime import datetime, timedelta
+from config import db_config , DevelopmentConfig
+from kafka import KafkaProducer
 
-# from app.enum import EnvironmentVariables as EnvVariables
+# Configura el productor Kafka
+producer = KafkaProducer(
+    # El nombre del servicio Kafka 
+    bootstrap_servers='localhost:29092',  
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serializa mensajes como JSON
+)
 
-# from kafka import KafkaConsumer
+app = Flask(__name__)
+# Configuración del JWT
+app.config['JWT_SECRET_KEY'] = DevelopmentConfig.SECRET_KEY
+jwt = JWTManager(app)
 
-
-# def main():
-#     try:
-#         # Para consumir los mensajes más recientes y confirmar automáticamente las compensaciones
-#         consumer = KafkaConsumer(
-#             EnvVariables.KAFKA_TOPIC_NAME.get_env(),
-#             bootstrap_servers=f'{EnvVariables.KAFKA_SERVER.get_env()}:{EnvVariables.KAFKA_PORT.get_env()}',
-#             value_deserializer=lambda x: loads(x.decode('utf-8')),
-#             auto_offset_reset='earliest',
-#             enable_auto_commit=True,
-#         )
-#         for message in consumer:
-#             print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
-#                                                  message.offset, message.key, message.value))
-
-#     except Exception as e:
-#         logging.info('Connection successful', e)
+# Almacén temporal para guardar los tokens de recuperación
+reset_tokens = {}
 
 
-from confluent_kafka import Producer, KafkaError
-import json
+#--------------------------------------LOGIN-------------------------------------
+@app.route('/inicio_sesion', methods=['POST'])
+def inicio_sesion():     
+    try:
+        # Cargar el JSON Schema
+        ruta_absoluta = "/home/escanor/Documentos/uniquindio-2023-2/Microservicios/taller_apirest_salome_version/schems/inicio_sesion_schema.json"
+        ruta_relativa= "../taller_apirest_salome_version/schems/inicio_sesion_schema.json"     
+        with open(ruta_relativa, 'r') as schema_file:
+          schema = json.load(schema_file)
+        # obtiene el JSON de respuesta
+        api_response=request.get_json()
 
-# Configuración del productor Kafka
-producer_conf = {
-    # Cambia el servidor y puerto según tu configuración
-    'bootstrap.servers': 'localhost:29092', 
-}
+        # valida la respuesta
+        jsonschema.validate(schema,api_response)
+       
+        
+        # Establecer una conexión con la base de datos PostgreSQL
+        conn = psycopg2.connect(**db_config)
+        cursor = conn.cursor()
 
-producer = Producer(producer_conf)
+        # Obtener los datos del inicio de sesión desde la carga JSON de la solicitud HTTP
+        data = request.get_json()
+        email = data['email']
+        password = data['password']
+        
+        # Buscar al usuario en la base de datos por su email
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cursor.fetchone()
 
-# Función para serializar y enviar un mensaje cuando un usuario se autentica
-def enviar_mensaje_autenticacion(email):
-    mensaje = {
-        'event_type': 'autenticacion',
-        'user_email': email
-    }
-    
-    # Serializar el mensaje como JSON
-    mensaje_serializado = json.dumps(mensaje).encode('utf-8')
-    
-    # Enviar el mensaje al tema 'autenticacion-topic'
-    producer.produce('autenticacion-topic', value=mensaje_serializado)
-    
-    # Esperar a que el mensaje se entregue (esto es opcional y puede omitirse si no es necesario)
-    producer.flush()
-    
-    # Manejar cualquier error que pueda ocurrir al enviar
-    while True:
-        try:
-            producer.poll(0)
-            break
-        except Exception as e:
-            if isinstance(e, KafkaError) and e.args[0].code() == KafkaError._PARTITION_EOF:
-                continue
-            else:
-                print(f"Error al enviar mensaje: {str(e)}")
-                break
+        
+        if user and user[2] == password:  # Verificar contraseña (esto debe ser un hash en la vida real)
+           # Generar un token JWT
+           access_token = create_access_token(identity=email)
+           
+           # Autenticación exitosa, envía un mensaje a Kafka
+           mensaje = {"usuario": email, "accion": "inicio_sesion"}
+           producer.send('autenticacion_log', value=mensaje)
 
-# Cerrar el productor al finalizar
-producer.flush()  # Asegurar que todos los mensajes pendientes se entreguen antes de cerrar
-producer = None  # Liberar el objeto productor
+           # Cerrar el cursor y la conexión
+           cursor.close()
+           conn.close()
+
+           return jsonify({"Token de acceso": access_token}), 200
+        else:
+           # Cerrar el cursor y la conexión
+           cursor.close()
+           conn.close()
+
+        return jsonify({"mensaje": "Credenciales invalidas"}), 401
+        
+    #except jsonschema.exceptions.ValidationError as e:
+    except Exception as e:
+        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
+        #print("La respuesta no cumple con el JSON Schema:")
+        #print(e)
+
+def status_404(error):
+    return "<h1>Página no encontrada</h1>", 404
+
+
+if __name__ == '__main__':
+    #Se activa el debug para poder hacer cambios en el servidor en tiempo real
+    app.debug = True
+    app.register_error_handler(404, status_404)
+    app.run()

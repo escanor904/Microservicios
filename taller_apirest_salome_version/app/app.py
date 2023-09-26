@@ -5,13 +5,14 @@ from random import choices
 from string import ascii_letters, digits
 from datetime import datetime, timedelta
 from config import db_config , DevelopmentConfig
+from kafka import KafkaProducer
 
-# Agregar la ubicación de la carpeta 'productor' al sys.path
-sys.path.append('../taller_logs_centralizados/punto_2')
-
-# Ahora puedes importar el módulo 
-import productor
-
+# Configura el productor Kafka
+producer = KafkaProducer(
+    # El nombre del servicio Kafka 
+    bootstrap_servers='localhost:29092',  
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serializa mensajes como JSON
+)
 
 app = Flask(__name__)
 # Configuración del JWT
@@ -28,7 +29,7 @@ def inicio_sesion():
     try:
         # Cargar el JSON Schema
         ruta_absoluta = "/home/escanor/Documentos/uniquindio-2023-2/Microservicios/taller_apirest_salome_version/schems/inicio_sesion_schema.json"
-        ruta_relativa= "../taller_apirest_salome_version/schems/inicio_sesion_schema.json"
+        ruta_relativa= "../taller_apirest_salome_version/schems/inicio_sesion_schema.json"     
         with open(ruta_relativa, 'r') as schema_file:
           schema = json.load(schema_file)
         # obtiene el JSON de respuesta
@@ -38,7 +39,7 @@ def inicio_sesion():
         jsonschema.validate(schema,api_response)
        
         
-            # Establecer una conexión con la base de datos PostgreSQL
+        # Establecer una conexión con la base de datos PostgreSQL
         conn = psycopg2.connect(**db_config)
         cursor = conn.cursor()
 
@@ -46,18 +47,23 @@ def inicio_sesion():
         data = request.get_json()
         email = data['email']
         password = data['password']
-
+        
         # Buscar al usuario en la base de datos por su email
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
 
+        
         if user and user[2] == password:  # Verificar contraseña (esto debe ser un hash en la vida real)
            # Generar un token JWT
            access_token = create_access_token(identity=email)
            
-           # Enviar un mensaje a Kafka indicando que el usuario se autenticó
-           productor.enviar_mensaje_autenticacion(email)
-           
+           # Autenticación exitosa, envía un mensaje a Kafka
+        #    mensaje = {"usuario": email, "accion": "inicio_sesion"}
+        #    producer.send('autenticacion-topic', value=mensaje)
+
+           mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
+           producer.send('autenticacion-topic', value=mensaje)
+
            # Cerrar el cursor y la conexión
            cursor.close()
            conn.close()
