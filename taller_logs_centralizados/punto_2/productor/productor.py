@@ -1,16 +1,15 @@
 from flask import Flask, request, jsonify
 import psycopg2,  jsonschema, json, sys
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from random import choices
-from string import ascii_letters, digits
-from datetime import datetime, timedelta
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity
+from datetime import datetime
 from config import db_config , DevelopmentConfig
 from kafka import KafkaProducer
 
 # Configura el productor Kafka
 producer = KafkaProducer(
     # El nombre del servicio Kafka 
-    bootstrap_servers='localhost:29092',  
+    bootstrap_servers='localhost:29092',
+    # bootstrap_servers= 'kafka:29092',  #contenedor  
     value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serializa mensajes como JSON
 )
 
@@ -27,18 +26,6 @@ reset_tokens = {}
 @app.route('/inicio_sesion', methods=['POST'])
 def inicio_sesion():     
     try:
-        # Cargar el JSON Schema
-        ruta_absoluta = "/home/escanor/Documentos/uniquindio-2023-2/Microservicios/taller_apirest_salome_version/schems/inicio_sesion_schema.json"
-        ruta_relativa= "../taller_apirest_salome_version/schems/inicio_sesion_schema.json"     
-        with open(ruta_relativa, 'r') as schema_file:
-          schema = json.load(schema_file)
-        # obtiene el JSON de respuesta
-        api_response=request.get_json()
-
-        # valida la respuesta
-        jsonschema.validate(schema,api_response)
-       
-        
         # Establecer una conexión con la base de datos PostgreSQL
         conn = psycopg2.connect(**db_config)
         cursor = conn.cursor()
@@ -58,8 +45,8 @@ def inicio_sesion():
            access_token = create_access_token(identity=email)
            
            # Autenticación exitosa, envía un mensaje a Kafka
-           mensaje = {"usuario": email, "accion": "inicio_sesion"}
-           producer.send('autenticacion_log', value=mensaje)
+           mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
+           producer.send('autenticacion-topic', value=mensaje)
 
            # Cerrar el cursor y la conexión
            cursor.close()
@@ -78,7 +65,7 @@ def inicio_sesion():
         return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
         #print("La respuesta no cumple con el JSON Schema:")
         #print(e)
-
+           
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
 

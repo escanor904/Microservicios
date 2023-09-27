@@ -51,7 +51,7 @@ services:
   consumer:
     container_name: consumer
     build:
-      context: ./consumer
+      context: ./consumidor
       dockerfile: Dockerfile
     environment:
       - KAFKA_TOPIC_NAME=topic_test
@@ -70,7 +70,7 @@ services:
   publisher:
     container_name: publisher
     build:
-      context: ./publisher
+      context: ./productor
       dockerfile: Dockerfile
     environment:
       - KAFKA_TOPIC_NAME=topic_test

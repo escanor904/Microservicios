@@ -3,14 +3,14 @@ import json
 
 # Configuración del consumidor de Kafka
 consumer_conf = {
-    'bootstrap.servers': 'localhost:29092',  # Cambia esto según tu configuración de Kafka
+    'bootstrap.servers': 'localhost:29092',
+    # 'bootstrap.servers': 'kafka:29092', #contenedor
+    # 'bootstrap.servers': '172.21.0.3:29092', # ip contenedor kafka
     'group.id': 'mi_grupo',
     'auto.offset.reset': 'earliest'
 }
-
 consumer = Consumer(consumer_conf)
 # Suscribe al mismo tema que el productor
-print("sa")
 consumer.subscribe(['autenticacion-topic'])
 try:
     while True:

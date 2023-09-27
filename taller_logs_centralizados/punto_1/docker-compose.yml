@@ -1,4 +1,4 @@
-version: '2'
+version: '3.8'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -7,12 +7,17 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - 22181:2181
+    networks:
+      - my-network
+  
   kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     ports:
       - 29092:29092
+    networks:
+      - my-network
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -22,15 +27,19 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
 
-  # #------------------------------PUNTO 2------------------------------------
+  #------------------------------PUNTO 2------------------------------------
   # productor:
   #   build:
-  #     context: ../../taller_apirest_salome_version/app 
+  #     context: ../punto_2/productor
   #     dockerfile: Dockerfile
-  #   ports:
-  #     - "5001:5001"
   #   depends_on:
   #     - kafka
+  #   ports:
+  #     - "5001:5001"
+  #   networks:
+  #     - my-network
+  #   environment:
+  #     KAFKA_BOOTSTRAP_SERVERS: kafka:29092
 
   # consumidor:
   #   build:
@@ -38,3 +47,11 @@ services:
   #     dockerfile: Dockerfile
   #   depends_on:
   #     - kafka
+  #   networks:
+  #     - my-network
+  #   environment:
+  #     KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+
+
+networks:
+  my-network:

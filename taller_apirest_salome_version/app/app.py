@@ -58,9 +58,6 @@ def inicio_sesion():
            access_token = create_access_token(identity=email)
            
            # Autenticación exitosa, envía un mensaje a Kafka
-        #    mensaje = {"usuario": email, "accion": "inicio_sesion"}
-        #    producer.send('autenticacion-topic', value=mensaje)
-
            mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
            producer.send('autenticacion-topic', value=mensaje)
 
