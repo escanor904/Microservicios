@@ -10,9 +10,11 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin_password
     ports:
-      - "5432:5432"
+      - "5400:5400"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - redApp
 
   python:
     build:
@@ -20,6 +22,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    networks:
+      - redApp
 
 volumes:
   postgres_data:
+
+networks:
+  redApp:
+    driver: bridge
