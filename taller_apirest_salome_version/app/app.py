@@ -4,7 +4,7 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token, ge
 from random import choices
 from string import ascii_letters, digits
 from datetime import datetime, timedelta
-from config import db_config , DevelopmentConfig
+from config_productor import db_config , DevelopmentConfig
 from kafka import KafkaProducer
 
 # Configura el productor Kafka

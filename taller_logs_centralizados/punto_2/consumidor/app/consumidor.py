@@ -1,36 +1,57 @@
-from confluent_kafka import Consumer, KafkaError
-import json
+from confluent_kafka import Consumer, KafkaError, KafkaException
+import json, sys
+from config_consumidor import consumer_conf
 
 # Configuración del consumidor de Kafka
-consumer_conf = {
-    'bootstrap.servers': 'localhost:29092',
-    # 'bootstrap.servers': 'kafka:29092', #contenedor
-    # 'bootstrap.servers': '172.21.0.3:29092', # ip contenedor kafka
-    'group.id': 'mi_grupo',
-    'auto.offset.reset': 'earliest'
-}
+
 consumer = Consumer(consumer_conf)
 # Suscribe al mismo tema que el productor
-consumer.subscribe(['autenticacion-topic'])
-try:
-    while True:
-        msg = consumer.poll(1.0)
+topics = ["autenticacion-topic"]
 
-        if msg is None:
-            continue
 
-        if msg.error(): 
-            if msg.error().code() == '':
-                print('Llegó al final de la partición')
-            else:
-                print('Error en el mensaje: {}'.format(msg.error()))
-        else:
-            mensaje = json.loads(msg.value())
-            print('Mensaje recibido: event_type={}, user_email={}, timestamp={}'.format(
-                mensaje['event_type'], mensaje['user_email'], mensaje['timestamp']
-            ))
 
-except KeyboardInterrupt:
-    pass
-finally:
-    consumer.close()
+
+
+def consume_loop(consumer,topics):
+    try:
+       consumer.subscribe(topics)
+       running= True
+    
+       while running:
+           msg = consumer.poll(timeout=1.0)
+           if msg is None: continue
+
+           if msg.error():
+               if msg.error().code() == KafkaError._PARTITION_EOF:
+                    # End of partition event
+                   sys.stderr.write('%% %s [%d] reached end at offset %d\n' %
+                                     (msg.topic(), msg.partition(), msg.offset()))
+               elif msg.error():
+                       raise KafkaException(msg.error())
+           else:
+            
+              msg_process(msg)
+            
+  
+    finally:
+        # Close down consumer to commit final offsets.
+        consumer.close()
+        
+
+def msg_process(msg):
+    try:
+        # Decodificar el valor del mensaje como cadena UTF-8 (puedes ajustar la codificación según tus necesidades)
+        message_value = msg.value().decode('utf-8')
+        
+        # Imprimir el contenido del mensaje en la consola
+        print(f"Mensaje recibido en el tópico '{msg.topic()}': {message_value}")
+        
+    except Exception as e:
+        print(f"Error al procesar el mensaje: {str(e)}")
+
+
+consume_loop(consumer,topics)
+
+
+
+

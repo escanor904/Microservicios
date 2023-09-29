@@ -2,16 +2,10 @@ from flask import Flask, request, jsonify
 import psycopg2,  jsonschema, json, sys
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity
 from datetime import datetime
-from config import db_config , DevelopmentConfig
-from kafka import KafkaProducer
+from config_productor import db_config , DevelopmentConfig, confluent_config
+from confluent_kafka import Producer
 
-# Configura el productor Kafka
-producer = KafkaProducer(
-    # El nombre del servicio Kafka 
-    bootstrap_servers='localhost:29092',
-    # bootstrap_servers= 'kafka:29092',  #contenedor  
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serializa mensajes como JSON
-)
+producer = Producer(confluent_config)
 
 app = Flask(__name__)
 # Configuración del JWT
@@ -19,7 +13,7 @@ app.config['JWT_SECRET_KEY'] = DevelopmentConfig.SECRET_KEY
 jwt = JWTManager(app)
 
 # Almacén temporal para guardar los tokens de recuperación
-reset_tokens = {}
+#reset_tokens = {}
 
 
 #--------------------------------------LOGIN-------------------------------------
@@ -45,10 +39,10 @@ def inicio_sesion():
            access_token = create_access_token(identity=email)
            
            # Autenticación exitosa, envía un mensaje a Kafka
+           #mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
+           #producer.send('autenticacion-topic', value=mensaje)
            mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
-           producer.send('autenticacion-topic', value=mensaje)
-
-           # Cerrar el cursor y la conexión
+           producer.produce('autenticacion-topic', key="key", value= convertirEnBytes(mensaje), callback=delivery_report)           # Cerrar el cursor y la conexión
            cursor.close()
            conn.close()
 
@@ -62,9 +56,23 @@ def inicio_sesion():
         
     #except jsonschema.exceptions.ValidationError as e:
     except Exception as e:
+        mensaje_de_error = str(e)
+        return mensaje_de_error
         return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
         #print("La respuesta no cumple con el JSON Schema:")
         #print(e)
+def convertirEnBytes(diccionario):
+    mensaje_json = json.dumps(diccionario)
+    # Codificar la cadena JSON en bytes (utf-8 es una codificación común)
+    mensaje_bytes = mensaje_json.encode('utf-8')
+    return mensaje_bytes
+            
+           
+def delivery_report(err, msg):
+    if err is not None:
+        print('Error al enviar el mensaje: {}'.format(err))
+    else:
+        print('Mensaje enviado a {} [{}]'.format(msg.topic(), msg.partition()))
            
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404

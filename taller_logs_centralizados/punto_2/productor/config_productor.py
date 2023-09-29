@@ -9,3 +9,8 @@ db_config = {
     'password': 'admin_password',
     'host': 'localhost'
 }
+
+confluent_config = {
+    'bootstrap.servers': 'localhost:29092',  # Dirección de los brokers de Kafka
+    'client.id': 'python-producer'
+}

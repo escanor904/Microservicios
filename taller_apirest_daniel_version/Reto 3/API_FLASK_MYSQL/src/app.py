@@ -1,5 +1,5 @@
 from flask import Flask , jsonify , request
-from config import config
+from config_productor import config
 import mysql.connector
 
 conexion = mysql.connector.connect(
