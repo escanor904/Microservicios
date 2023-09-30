@@ -4,23 +4,16 @@ from flask_jwt_extended import JWTManager, jwt_required, create_access_token, ge
 from random import choices
 from string import ascii_letters, digits
 from datetime import datetime, timedelta
-from config_productor import db_config , DevelopmentConfig
-from kafka import KafkaProducer
+from config import db_config , DevelopmentConfig
 
-# Configura el productor Kafka
-producer = KafkaProducer(
-    # El nombre del servicio Kafka 
-    bootstrap_servers='localhost:29092',  
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serializa mensajes como JSON
-)
+
+
 
 app = Flask(__name__)
 # Configuración del JWT
 app.config['JWT_SECRET_KEY'] = DevelopmentConfig.SECRET_KEY
 jwt = JWTManager(app)
 
-# Almacén temporal para guardar los tokens de recuperación
-reset_tokens = {}
 
 
 #--------------------------------------LOGIN-------------------------------------
@@ -56,11 +49,6 @@ def inicio_sesion():
         if user and user[2] == password:  # Verificar contraseña (esto debe ser un hash en la vida real)
            # Generar un token JWT
            access_token = create_access_token(identity=email)
-           
-           # Autenticación exitosa, envía un mensaje a Kafka
-           mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
-           producer.send('autenticacion-topic', value=mensaje)
-
            # Cerrar el cursor y la conexión
            cursor.close()
            conn.close()

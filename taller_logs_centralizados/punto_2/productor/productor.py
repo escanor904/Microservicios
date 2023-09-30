@@ -1,6 +1,7 @@
+
 from flask import Flask, request, jsonify
-import psycopg2,  jsonschema, json, sys
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity
+import psycopg2, json
+from flask_jwt_extended import JWTManager, create_access_token
 from datetime import datetime
 from config_productor import db_config , DevelopmentConfig, confluent_config
 from confluent_kafka import Producer
@@ -39,8 +40,6 @@ def inicio_sesion():
            access_token = create_access_token(identity=email)
            
            # Autenticación exitosa, envía un mensaje a Kafka
-           #mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
-           #producer.send('autenticacion-topic', value=mensaje)
            mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
            producer.produce('autenticacion-topic', key="key", value= convertirEnBytes(mensaje), callback=delivery_report)           # Cerrar el cursor y la conexión
            cursor.close()
@@ -58,9 +57,7 @@ def inicio_sesion():
     except Exception as e:
         mensaje_de_error = str(e)
         return mensaje_de_error
-        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
-        #print("La respuesta no cumple con el JSON Schema:")
-        #print(e)
+        
 def convertirEnBytes(diccionario):
     mensaje_json = json.dumps(diccionario)
     # Codificar la cadena JSON en bytes (utf-8 es una codificación común)

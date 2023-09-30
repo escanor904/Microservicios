@@ -7,8 +7,11 @@ RUN apt-get install libpq-dev
 
 COPY . .
 
+RUN pip install --upgrade pip
+RUN pip install psycopg2-binary
+RUN apt install libpq5
 RUN pip install -r requirements.txt
-RUN pip install --force-reinstall psycopg2
+
 
 CMD [ "python", "productor.py" ]
 

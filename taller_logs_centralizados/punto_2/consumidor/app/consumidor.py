@@ -1,6 +1,7 @@
 from confluent_kafka import Consumer, KafkaError, KafkaException
-import json, sys
+import  sys
 from config_consumidor import consumer_conf
+
 
 # Configuración del consumidor de Kafka
 
@@ -14,7 +15,7 @@ topics = ["autenticacion-topic"]
 
 def consume_loop(consumer,topics):
     try:
-       consumer.subscribe(topics)
+       #consumer.subscribe(topics)
        running= True
     
        while running:

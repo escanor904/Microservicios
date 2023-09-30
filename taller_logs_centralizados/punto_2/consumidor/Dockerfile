@@ -1,8 +1,8 @@
 FROM python:3.11
 
 WORKDIR /app
-
-COPY app/consumidor.py consumidor.py
+#guarda todos los archivos de la carpeta app
+COPY  app/ /app/  
 
 RUN pip install confluent-kafka
 

@@ -4,31 +4,41 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.0
     container_name: zookeeper
-    networks:
-      - broker-kafka
     ports:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
 
+  
   kafka:
-    image: confluentinc/cp-kafka:6.2.0
-    container_name: kafka
-    networks:
-      - broker-kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-      - "9101:9101"
+    image: 'bitnami/kafka:latest'
+
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ADVERTISED_HOST_NAME: kafka:9092
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+    
+  #kafka:
+   # image: confluentinc/cp-kafka:latest
+    #container_name: kafka
+    #depends_on:
+     # - zookeeper
+    #ports:
+     # - "9092:9092"
+      #- "9101:9101"
+    #environment:
+     # KAFKA_BROKER_ID: 1
+      #KAFKA_ADVERTISED_HOST_NAME: kafka:9092
+      #KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      #KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      #KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      #KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
       # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       # KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       # KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -36,17 +46,16 @@ services:
       # KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
+
   kafdrop:
     image: obsidiandynamics/kafdrop:3.27.0
-    networks:
-      - broker-kafka
     depends_on:
       - kafka
       - zookeeper
     ports:
       - 19000:9000
     environment:
-      KAFKA_BROKERCONNECT: kafka:29092
+      KAFKA_BROKERCONNECT: kafka:9092
 
   consumer:
     container_name: consumer
@@ -54,18 +63,37 @@ services:
       context: ./consumidor
       dockerfile: Dockerfile
     environment:
-      - KAFKA_TOPIC_NAME=topic_test
-      - KAFKA_SERVER=kafka
-      - KAFKA_PORT=29092
+       KAFKA_TOPIC_NAME: topic_test
+       KAFKA_SERVER: kafka
+       KAFKA_PORT: 9092
     ports:
       - 8001:8001
-    restart: "always"
+    restart: always
     depends_on:
       - zookeeper
       - kafka
-      - publisher
-    networks:
-      - broker-kafka
+      
+
+
+
+  db:
+     image: postgres:latest
+     restart: always
+     ports:
+       -  32000:3306
+     environment:
+        POSTGRES_DB: authentication_db
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: admin_password
+        POSTGRES_HOST_AUTH_METHOD: trust
+        
+     volumes:
+       
+       - ../punto_2/inicializar.sql:/docker-entrypoint-initdb.d/inicializar.sql
+      #- ./postgres-vol:/var/lib/postgresql/data          #crea el volumen donde se van a persistir los datos en local y en el docker
+      #- ./sql/inicializar.sql:/docker-entrypoint-initdb.d/inicializar.sql
+
+
 
   publisher:
     container_name: publisher
@@ -73,18 +101,20 @@ services:
       context: ./productor
       dockerfile: Dockerfile
     environment:
-      - KAFKA_TOPIC_NAME=topic_test
-      - KAFKA_SERVER=kafka
-      - KAFKA_PORT=29092
+      DB_NAME: authentication_db
+      DB_USER: admin
+      POSTGRES_PASSWORD: admin_password
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      KAFKA_TOPIC_NAME: topic_test
+      KAFKA_SERVER: kafka
+      KAFKA_PORT: 9092
     ports:
-      - 8000:8000
-    restart: "always"
+      - 5000:5000
+    restart: always
     depends_on:
+      - db
       - zookeeper
       - kafka
-    networks:
-      - broker-kafka
 
-networks:
-  broker-kafka:
-    driver: bridge
+
