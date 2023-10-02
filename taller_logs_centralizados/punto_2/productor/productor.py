@@ -1,16 +1,27 @@
 
 from flask import Flask, request, jsonify
-import psycopg2, json
+import psycopg2, json,  logging
 from flask_jwt_extended import JWTManager, create_access_token
 from datetime import datetime
-from config_productor import db_config , DevelopmentConfig, confluent_config
-from confluent_kafka import Producer
+from config_productor import db_config , ProducerConfig
+from kafka import KafkaProducer
+#from confluent_kafka import Producer
 
-producer = Producer(confluent_config)
+#config = {
+#    'bootstrap.servers': f'{ProducerConfig.KAFKA_SERVER}:{ProducerConfig.KAFKA_PORT}',  # Dirección del servidor Kafka
+#    'client.id':  socket.gethostname()
+#}
+
+#producer= Producer(config)
+producer = KafkaProducer(
+    bootstrap_servers=[f'{ProducerConfig.KAFKA_SERVER}:{ProducerConfig.KAFKA_PORT}'],
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+)
+
 
 app = Flask(__name__)
 # Configuración del JWT
-app.config['JWT_SECRET_KEY'] = DevelopmentConfig.SECRET_KEY
+app.config['JWT_SECRET_KEY'] = ProducerConfig.SECRET_KEY
 jwt = JWTManager(app)
 
 # Almacén temporal para guardar los tokens de recuperación
@@ -41,7 +52,20 @@ def inicio_sesion():
            
            # Autenticación exitosa, envía un mensaje a Kafka
            mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
-           producer.produce('autenticacion-topic', key="key", value= convertirEnBytes(mensaje), callback=delivery_report)           # Cerrar el cursor y la conexión
+           #mensaje_serializado = json.dumps(mensaje)
+           #producer.produce(ProducerConfig.KAFKA_TOPIC_NAME,key=None, value=mensaje_serializado)
+           #producer.produce('autenticacion-topic', key="key", value= convertirEnBytes(mensaje), callback=delivery_report)           # Cerrar el cursor y la conexión
+           #producer.send(ProducerConfig.KAFKA_TOPIC_NAME, mensaje)  
+           
+           producer.send(ProducerConfig.KAFKA_TOPIC_NAME, value=mensaje)
+           
+           logging.basicConfig(level=logging.INFO,  # Establece el nivel de registro (puedes usar 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # Define el formato del mensaje de registro
+           logger = logging.getLogger(__name__)
+
+           # Registra un mensaje
+           logger.info('Mensaje enviado al tema:', ProducerConfig.KAFKA_TOPIC_NAME)  
+           
            cursor.close()
            conn.close()
 

@@ -1,57 +1,38 @@
-from confluent_kafka import Consumer, KafkaError, KafkaException
-import  sys
-from config_consumidor import consumer_conf
-
-
-# Configuración del consumidor de Kafka
-
-consumer = Consumer(consumer_conf)
-# Suscribe al mismo tema que el productor
-topics = ["autenticacion-topic"]
+import logging
+from json import loads
+from config_consumidor import ConsumerConfig
+from kafka import KafkaConsumer 
 
 
 
-
-
-def consume_loop(consumer,topics):
+def consumer_loop():
     try:
-       #consumer.subscribe(topics)
-       running= True
-    
-       while running:
-           msg = consumer.poll(timeout=1.0)
-           if msg is None: continue
-
-           if msg.error():
-               if msg.error().code() == KafkaError._PARTITION_EOF:
-                    # End of partition event
-                   sys.stderr.write('%% %s [%d] reached end at offset %d\n' %
-                                     (msg.topic(), msg.partition(), msg.offset()))
-               elif msg.error():
-                       raise KafkaException(msg.error())
-           else:
+        # To consume latest messages and auto-commit offsets
+        consumer = KafkaConsumer(
+            ConsumerConfig.KAFKA_TOPIC_NAME,
+            bootstrap_servers=f'{ConsumerConfig.KAFKA_SERVER}:{ConsumerConfig.KAFKA_PORT}',
+            value_deserializer=lambda x: loads(x.decode('utf-8')),
+            auto_offset_reset='earliest',
+            enable_auto_commit=True,
+        )
+        
+        for message in consumer:
+            logging.basicConfig(level=logging.INFO,  # Establece el nivel de registro (puedes usar 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # Define el formato del mensaje de registro
             
-              msg_process(msg)
+            logger = logging.getLogger(__name__)
             
-  
-    finally:
-        # Close down consumer to commit final offsets.
-        consumer.close()
-        
+            logger.info("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
+                                                 message.offset, message.key, message.value))
+            print("%s:%d:%d: key=%s value=%s" % (message.topic, message.partition,
+                                                 message.offset, message.key, message.value))
 
-def msg_process(msg):
-    try:
-        # Decodificar el valor del mensaje como cadena UTF-8 (puedes ajustar la codificación según tus necesidades)
-        message_value = msg.value().decode('utf-8')
-        
-        # Imprimir el contenido del mensaje en la consola
-        print(f"Mensaje recibido en el tópico '{msg.topic()}': {message_value}")
-        
     except Exception as e:
-        print(f"Error al procesar el mensaje: {str(e)}")
+        logging.info('Connection successful', e)
 
 
-consume_loop(consumer,topics)
+
+consumer_loop()
 
 
 

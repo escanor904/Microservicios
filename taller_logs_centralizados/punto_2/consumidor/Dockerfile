@@ -4,7 +4,7 @@ WORKDIR /app
 #guarda todos los archivos de la carpeta app
 COPY  app/ /app/  
 
-RUN pip install confluent-kafka
+RUN pip install kafka-python
 
 CMD ["python", "consumidor.py"]
 

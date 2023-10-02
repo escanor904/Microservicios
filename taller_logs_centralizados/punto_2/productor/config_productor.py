@@ -1,9 +1,11 @@
 import os
 import time
 
-class DevelopmentConfig:
+class ProducerConfig:
     SECRET_KEY ='mypass'
-    time.sleep(20)
+    KAFKA_TOPIC_NAME = os.environ['KAFKA_TOPIC_NAME']
+    KAFKA_SERVER = os.environ['KAFKA_SERVER']
+    KAFKA_PORT = os.environ['KAFKA_PORT']
    
     
 
@@ -17,10 +19,3 @@ db_config = {
     'port': os.environ['DATABASE_PORT']
 }
 
-KAFKA_SERVER = os.environ['KAFKA_SERVER']
-KAFKA_PORT = os.environ['KAFKA_PORT']
-confluent_config = {
-    
-    'bootstrap.servers': f'{KAFKA_SERVER}:{KAFKA_PORT}',  # Dirección de los brokers de Kafka
-    'client.id': 'python-producer'
-}
