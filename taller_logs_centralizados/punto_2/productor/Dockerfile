@@ -7,6 +7,7 @@ RUN apt-get install libpq-dev
 
 COPY . .
 
+EXPOSE 5000
 RUN pip install --upgrade pip
 RUN pip install psycopg2-binary
 RUN apt install libpq5
@@ -22,7 +23,7 @@ CMD [ "python", "productor.py" ]
 # # Crea un usuario no root
 # RUN useradd -ms /bin/bash escanor
 # USER escanor
-# EXPOSE 80
+ 
 
 # # Establece el directorio de trabajo
 # WORKDIR /home/appuser/app

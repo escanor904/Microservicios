@@ -103,4 +103,4 @@ if __name__ == '__main__':
     #Se activa el debug para poder hacer cambios en el servidor en tiempo real
     app.debug = True
     app.register_error_handler(404, status_404)
-    app.run()
+    app.run(host='0.0.0.0', port=5000) #si tiene esta direccion 
