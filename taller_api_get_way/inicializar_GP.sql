@@ -12,10 +12,6 @@ CREATE TABLE profiles (
 );
 
 
-
-
-
-
 -- Insertar datos de prueba en la tabla users
 INSERT INTO profiles (email, username, pagina_personal, correspondencia, biografia, organizacion, pais, linkedln_url, informacion_publica)
 VALUES
@@ -26,3 +22,5 @@ VALUES
   ('rocket_r@email.com', 'Rocket Raccoon', 'www.ejemplo.com/rocket', '111 Galaxy St, City', 'Guardián del espacio y amante de los mapaches.', 'Guardians of Galaxy', 'Espacio Exterior', 'https://www.linkedin.com/in/rocketraccoon', true),
   ('isaac_n@email.com', 'Isaac Newton', 'www.ejemplo.com/isaac', '222 Apple St, City', 'Físico y matemático pionero.', 'Royal Society', 'Reino Unido', 'https://www.linkedin.com/in/isaacnewton', true),
   ('lila_m@email.com', 'Lila Mikel', 'www.ejemplo.com/lila', '333 Violet St, City', 'Exploradora del mundo y amante de la naturaleza.', 'Nature Explorers', 'Australia', 'https://www.linkedin.com/in/lilamikel', true);
+
+

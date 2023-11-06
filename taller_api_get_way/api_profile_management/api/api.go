@@ -2,15 +2,19 @@ package api
 
 import (
 	"apigetWay/api_gestion/data"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"strings"
+	"time"
 
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	"github.com/segmentio/kafka-go"
 )
 
 // la variable con "" quere decir que no hay ususario logeado
@@ -116,11 +120,16 @@ func (a *API) getProfile(w http.ResponseWriter, r *http.Request) {
 	// Quitar el prefijo 'Bearer ' del encabezado 'Authorization'
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 
+	// Establecer conexión con el líder del tópico
+
 	if tokenIsValid(token) {
+
 		//si el token es valido
 
 		//obtenemos el usuario del token
 		usuarioEnSesion = getEmail(token)
+
+		enviarLogKafka("consulta_profile")
 
 		w.Header().Set("Content-Type", "application/json")
 		vars := mux.Vars(r)
@@ -207,4 +216,24 @@ func tokenIsValid(tokenStr string) bool {
 
 	return token.Valid
 
+}
+
+func enviarLogKafka(eventTipe string) {
+
+	mensaje := map[string]string{
+		"event_type": eventTipe,
+		"user_email": usuarioEnSesion,
+		"timestamp":  time.Now().Format(time.RFC3339),
+	}
+
+	// Convertir el mapa a formato JSON
+	jsonData, err := json.Marshal(mensaje)
+	if err != nil {
+		log.Fatal("Error al convertir el mensaje a JSON:", err)
+	}
+
+	conn, _ := kafka.DialLeader(context.Background(), "tcp", "localhost:9093", "autenticacion-topic", 0)
+	conn.SetWriteDeadline(time.Now().Add(time.Second * 10))
+
+	conn.WriteMessages(kafka.Message{Value: jsonData})
 }
