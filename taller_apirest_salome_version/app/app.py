@@ -14,16 +14,18 @@ app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = DevelopmentConfig.SECRET_KEY
 jwt = JWTManager(app)
 
-
+reset_tokens = []
 
 #--------------------------------------LOGIN-------------------------------------
 @app.route('/inicio_sesion', methods=['POST'])
 def inicio_sesion():     
     try:
+        
+    
         # Cargar el JSON Schema
         ruta_absoluta = "/home/escanor/Documentos/uniquindio-2023-2/Microservicios/taller_apirest_salome_version/schems/inicio_sesion_schema.json"
         ruta_relativa= "../taller_apirest_salome_version/schems/inicio_sesion_schema.json"     
-        with open(ruta_relativa, 'r') as schema_file:
+        with open(ruta_absoluta, 'r') as schema_file:
           schema = json.load(schema_file)
         # obtiene el JSON de respuesta
         api_response=request.get_json()
@@ -40,14 +42,17 @@ def inicio_sesion():
         data = request.get_json()
         email = data['email']
         password = data['password']
+    
         
         # Buscar al usuario en la base de datos por su email
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
-
+        
+        
         
         if user and user[2] == password:  # Verificar contraseña (esto debe ser un hash en la vida real)
            # Generar un token JWT
+           
            access_token = create_access_token(identity=email)
            # Cerrar el cursor y la conexión
            cursor.close()
@@ -59,14 +64,19 @@ def inicio_sesion():
            cursor.close()
            conn.close()
 
-        return jsonify({"mensaje": "Credenciales invalidas"}), 401
+           return jsonify({"mensaje": "Credenciales invalidas"}), 401
         
     #except jsonschema.exceptions.ValidationError as e:
     except Exception as e:
-        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"}), 400
-        #print("La respuesta no cumple con el JSON Schema:")
-        #print(e)
+        error_message = "Se produjo un error inesperado: " + str(e)
+        print(error_message)
+        return jsonify({"mensaje": error_message}), 500  # Código de estado HTTP 500 (Internal Server Error)
+
+        
+    except jsonschema.exceptions.ValidationError as e:
+        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"+e}), 400
             
+
 
 #--------------------------------------CAMBIAR CONTRASEÑA------------------------
 @app.route('/cambio_contrasena', methods=['POST'])

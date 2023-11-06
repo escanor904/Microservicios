@@ -12,14 +12,6 @@ CREATE TABLE profiles (
 );
 
 
--- creacion tabla logs
-CREATE TABLE logs (
-  log_id SERIAL PRIMARY KEY,
-  evento VARCHAR(50) NOT NULL,
-  user_email VARCHAR(100) NOT NULL,
-  fecha_log TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_email) REFERENCES profiles(email)
-);
 
 
 

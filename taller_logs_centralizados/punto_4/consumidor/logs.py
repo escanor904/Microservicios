@@ -18,19 +18,7 @@ def consumer_loop():
         )
 
        
-        
-
-        # # Nombre del archivo CSV donde se almacenarán los mensajes
-        # csv_filename = 'logs.csv'
-
-        # # Verifica si el archivo CSV ya existe en la carpeta actual
-        # if not os.path.exists(csv_filename):
-        #     # Si no existe, crea el archivo y escribe la cabecera
-        #     with open(csv_filename, mode='w', newline='') as csv_file:
-        #         fieldnames = ['event_type', 'user_email', 'timestamp']
-        #         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        #         writer.writeheader()
-
+    
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logger = logging.getLogger(__name__)
 
