@@ -75,6 +75,59 @@ def inicio_sesion():
     except Exception as e:
         mensaje_de_error = str(e)
         return mensaje_de_error
+    
+    
+#--------------------------------------CRUD--------------------------------------
+# Definición de una ruta para el registro de usuarios
+@app.route('/users', methods=['POST'])
+def registro_usuario():
+    # Establecer una conexión con la base de datos PostgreSQL
+    conn = psycopg2.connect(**db_config)
+    cursor = conn.cursor()
+
+    try:
+        # Obtener los datos del usuario desde la carga JSON de la solicitud HTTP
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        email = data.get('email')
+
+        # Verificar si alguno de los campos está vacío
+        if not username or not password or not email:
+            return jsonify({"error": "Diligencia todos los campos"}), 400
+
+        # Verificar si el usuario ya existe (por nombre de usuario o correo electrónico)
+        cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s OR email = %s", (username, email))
+        existe_usuario = cursor.fetchone()[0]
+        if existe_usuario:
+            return jsonify({"error": "Ese usuario o corre electronico ya esta registrado"}), 409
+
+        # Ejecutar una consulta SQL para insertar los datos del usuario en la tabla 'users'
+        cursor.execute("INSERT INTO users (username, hashed_password, email) VALUES (%s, %s, %s)",
+                       (username, password, email))
+
+        # Confirmar la transacción y cerrar el cursor y la conexión
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+
+        mensaje = {"event_type": "registro_usuario", "username":username, "user_email": email , "timestamp": str(datetime.now())}
+    
+        producer.send(ProducerConfig.KAFKA_TOPIC_MANAGMENT, value=mensaje)
+        
+        logging.basicConfig(level=logging.INFO,  # Establece el nivel de registro (puedes usar 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # Define el formato del mensaje de registro
+        logger = logging.getLogger(__name__)
+
+        # Registra un mensaje
+        logger.info('Mensaje enviado al tema: %s', ProducerConfig.KAFKA_TOPIC_MANAGMENT)  
+
+        mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
+        return jsonify({"mensaje": "Usuario registrado exitosamente"}), 201
+
+    except Exception as e:
+        return jsonify({"error": "Error en el servidor"}), 500    
         
 @app.route('/consultar_logs/<string:usuario>', methods=['GET'])
 def consultar_logs(usuario):

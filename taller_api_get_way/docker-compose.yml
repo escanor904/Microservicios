@@ -73,7 +73,7 @@ services:
       POSTGRES_PASSWORD: admin_password
       DATABASE_HOST: db_users
       DATABASE_PORT: 5432
-      KAFKA_TOPIC_NAME: autenticacion-topic
+      KAFKA_TOPIC_NAME: autenticacion-topic 
       KAFKA_SERVER: kafka
       KAFKA_PORT: 9092
     ports:
@@ -96,6 +96,7 @@ services:
       DATABASE_HOST: db_users
       DATABASE_PORT: 5432
       KAFKA_TOPIC_NAME: autenticacion-topic
+      KAFKA_TOPIC_MANAGMENT: managment-topic
       KAFKA_SERVER: kafka
       KAFKA_PORT: 9092
     ports:

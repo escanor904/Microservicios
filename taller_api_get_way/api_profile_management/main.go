@@ -2,6 +2,7 @@ package main
 
 import (
 	"apigetWay/api_gestion/api"
+	"apigetWay/api_gestion/data"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -10,6 +11,7 @@ import (
 func main() {
 
 	//enrutador
+	go data.EscucharEventos()
 	router := mux.NewRouter().StrictSlash(true)
 
 	//create the API object
