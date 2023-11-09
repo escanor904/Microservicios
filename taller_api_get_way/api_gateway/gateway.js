@@ -1,42 +1,85 @@
 const express = require('express');
 const axios = require('axios');
-const fs = require('fs');
+const winston = require('winston');
 
 const app = express();
 const PORT = 3000;
 
-// Middleware para registrar logs
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  defaultMeta: { service: 'api-gateway' },
+  transports: [
+    new winston.transports.Http({
+      host: '127.0.0.',
+      port: 5000,
+      path: '/log',
+    }),
+  ],
+});
+
 const logMiddleware = (req, res, next) => {
-  const logData = `${new Date().toISOString()} - ${req.method} Request for ${req.url}\n`;
-  fs.appendFile('logs.txt', logData, (err) => {
-    if (err) console.error('Error writing to log file');
-  });
+  const startTime = new Date();
+  req.startTime = startTime;
   next();
+};
+
+const logResponse = (req, res) => {
+  let logInfo = {
+    application: req.path.slice(1),
+    message: `${req.method} Request for ${req.url}`,
+    timestamp: new Date().toISOString(),
+  };
+
+  logger.info(logInfo);
 };
 
 app.use(express.json());
 app.use(logMiddleware);
 
-// Ruta para autenticación
 app.post('/auth', async (req, res) => {
   try {
-    const authResponse = await axios.post('URL_DEL_API_DE_AUTENTICACION', req.body);
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Faltan datos de email o contraseña' });
+    }
+
+    const authResponse = await axios.post('http://127.0.0.1:5000/inicio_sesion', { email, password });
+
+    logResponse(req, res);
+
     res.json(authResponse.data);
   } catch (error) {
+    logResponse(req, res);
+
     res.status(500).json({ error: 'Error en la autenticación' });
   }
 });
 
-// Ruta para registro
 app.post('/register', async (req, res) => {
   try {
-    const registerResponse = await axios.post('URL_DEL_API_DE_REGISTRO', req.body);
+    const { username, password, email } = req.body;
+
+    if (!username || !password || !email) {
+      return res.status(400).json({ error: 'Faltan datos de nombre de usuario, contraseña o email' });
+    }
+
+    const registerResponse = await axios.post('http://127.0.0.1:5000/users', { username, password, email });
+
+    logResponse(req, res);
+
     res.json(registerResponse.data);
   } catch (error) {
+    logResponse(req, res);
+
     res.status(500).json({ error: 'Error en el registro' });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`API Gateway running on port ${PORT}`);
+  console.log(`API Gateway Funcionando En El Puerto ${PORT}`);
 });
