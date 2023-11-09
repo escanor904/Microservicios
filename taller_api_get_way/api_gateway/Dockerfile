@@ -6,7 +6,7 @@ WORKDIR /app
 
 #Actualizamos
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install nodejs
+RUN apt-get install npm
 
 # Instalamos las dependencias
 RUN npm install express
