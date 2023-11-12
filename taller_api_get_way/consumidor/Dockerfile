@@ -13,5 +13,10 @@ RUN apt install libpq5
 RUN pip install kafka-python
 RUN pip install Flask
 
+RUN pip install --no-cache-dir Flask psycopg2-binary jsonlogging Flask-Limiter Flask-Caching Flask-Bcrypt Flask-JWT-Extended requests
+RUN apt-get update && apt-get install -y postgresql-client
+
+EXPOSE 8081
+
 CMD ["python", "logs.py"]
 

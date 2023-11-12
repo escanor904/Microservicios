@@ -59,8 +59,19 @@ services:
       
       - ./inicializar_users.sql:/docker-entrypoint-initdb.d/inicializar_users.sql
     
-   
-
+  logs_db:
+    image: postgres:latest
+    restart: always
+    ports:
+      -  5435:5432
+    environment:
+      POSTGRES_DB: logs_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+      
+    volumes:
+      - ./inicializar_logs.sql:/docker-entrypoint-initdb.d/inicializar_logs.sql
     
   consumer:
     container_name: consumer
@@ -68,21 +79,22 @@ services:
       context: ./consumidor
       dockerfile: Dockerfile
     environment:
-      DB_NAME: authentication_db
+      DB_NAME: logs_db
       DB_USER: admin
       POSTGRES_PASSWORD: admin_password
-      DATABASE_HOST: db_users
+      DATABASE_HOST: logs_db
       DATABASE_PORT: 5432
-      KAFKA_TOPIC_NAME: autenticacion-topic 
+      KAFKA_TOPIC_NAME: autenticacion-topic
       KAFKA_SERVER: kafka
       KAFKA_PORT: 9092
     ports:
-      - 8001:8001
+      - 8081:8081
+    hostname: logsapp-cont
     restart: always
     depends_on:
       - zookeeper
       - kafka
-
+      - logs_db
   
   api_users:
     container_name: api_users
