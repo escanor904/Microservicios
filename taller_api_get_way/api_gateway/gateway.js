@@ -14,7 +14,7 @@ const logger = winston.createLogger({
   defaultMeta: { service: 'api-gateway' },
   transports: [
     new winston.transports.Http({
-      host: '127.0.0.',
+      host: '127.0.0.1',
       port: 5000,
       path: '/log',
     }),
@@ -24,14 +24,20 @@ const logger = winston.createLogger({
 const logMiddleware = (req, res, next) => {
   const startTime = new Date();
   req.startTime = startTime;
+
+  // Log simple en la consola
+  console.log(`Received ${req.method} request for ${req.url}`);
+
   next();
 };
 
 const logResponse = (req, res) => {
   let logInfo = {
-    application: req.path.slice(1),
-    message: `${req.method} Request for ${req.url}`,
+    application: 'api-gateway', // Nombre de la aplicación
+    log_type: 'info', // Tipo de log (puedes personalizar esto según tus necesidades)
     timestamp: new Date().toISOString(),
+    description: `${req.method} Request for ${req.url}`, // Descripción de la solicitud
+    email: req.body.email || '', // Correo electrónico (si está presente en el cuerpo de la solicitud)
   };
 
   logger.info(logInfo);
