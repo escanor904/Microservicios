@@ -22,17 +22,6 @@ def inicio_sesion():
     try:
         
     
-        # Cargar el JSON Schema
-        ruta_absoluta = "/home/escanor/Documentos/uniquindio-2023-2/Microservicios/taller_apirest_salome_version/schems/inicio_sesion_schema.json"
-        ruta_relativa= "../taller_apirest_salome_version/schems/inicio_sesion_schema.json"     
-        with open(ruta_absoluta, 'r') as schema_file:
-          schema = json.load(schema_file)
-        # obtiene el JSON de respuesta
-        api_response=request.get_json()
-
-        # valida la respuesta
-        jsonschema.validate(schema,api_response)
-       
         
         # Establecer una conexión con la base de datos PostgreSQL
         conn = psycopg2.connect(**db_config)
@@ -287,7 +276,7 @@ def registro_usuario():
         cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s OR email = %s", (username, email))
         existe_usuario = cursor.fetchone()[0]
         if existe_usuario:
-            return jsonify({"error": "Ese usuario o corre electronico ya exiesta registrado"}), 409
+            return jsonify({"error": "Ese usuario o correo electronico ya exista registrado"}), 409
 
         # Ejecutar una consulta SQL para insertar los datos del usuario en la tabla 'users'
         cursor.execute("INSERT INTO users (username, hashed_password, email) VALUES (%s, %s, %s)",
@@ -408,4 +397,4 @@ if __name__ == '__main__':
     #Se activa el debug para poder hacer cambios en el servidor en tiempo real
     app.debug = True
     app.register_error_handler(404, status_404)
-    app.run()
+    app.run(host='0.0.0.0', port=5001)
