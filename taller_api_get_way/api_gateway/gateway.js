@@ -86,6 +86,75 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.use(express.json());
+app.use(logMiddleware);
+
+// Ruta para recibir y reenviar el token
+app.get('/mostrarPerfil', (req, res) => {
+  try {
+    const receivedToken = req.query.token; // Recibe el token desde la variable de consulta
+
+    if (!receivedToken) {
+      return res.status(400).json({ error: 'Falta el token en la variable de consulta' });
+    }
+
+    // Envía el token a la otra aplicación
+    const otherAppURL = 'http://127.0.0.1:8080/getProfile'; // Reemplaza con la URL real
+    axios.post(otherAppURL, { token: receivedToken });
+
+    res.json({ message: 'Token enviado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al enviar el token' });
+  }
+});
+
+app.update('/updateProfile', async (req, res) => {
+  try {
+    const { token, username, personalpage, correspondence, biography, organization, country, linkedinUrl, publicInformation } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ error: 'Falta el token en la solicitud' });
+    }
+
+    // Log al recibir datos
+    let logInfoReceive = {
+      application: 'api-gateway',
+      log_type: 'info',
+      timestamp: new Date().toISOString(),
+      description: 'Received bad data for storage'
+    };
+    logger.info(logInfoReceive);
+
+    // Envía el token y otros datos a otra API
+    const otherApiURL = 'http://127.0.0.1:8080/updateProfile'; // Reemplaza con la URL real
+    await axios.post(otherApiURL, { token, username, personalpage, correspondence, biography, organization, country, linkedinUrl, publicInformation });
+
+    // Log al enviar datos a otra API
+    let logInfoSend = {
+      application: 'api-gateway',
+      log_type: 'info',
+      timestamp: new Date().toISOString(),
+      description: 'Sent data to another API',
+      data: { username, personalpage, correspondence, biography, organization, country, linkedinUrl, publicInformation },
+    };
+    logger.info(logInfoSend);
+
+    res.json({ message: 'Datos almacenados y enviados correctamente' });
+  } catch (error) {
+    // Log en caso de error
+    let logError = {
+      application: 'api-gateway',
+      log_type: 'error',
+      timestamp: new Date().toISOString(),
+      description: 'Error processing the request',
+      error: error.message,
+    };
+    logger.error(logError);
+
+    res.status(500).json({ error: 'Error al procesar la solicitud' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`API Gateway Funcionando En El Puerto ${PORT}`);
 });
