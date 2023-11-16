@@ -3,7 +3,7 @@ import time
 
 class ProducerConfig:
     SECRET_KEY ='mypass'
-    KAFKA_TOPIC_NAME = os.environ['KAFKA_TOPIC_NAME']
+    KAFKA_TOPIC_NAME = os.environ['KAFKA_TOPIC_LOGS']
     KAFKA_TOPIC_MANAGMENT= os.environ['KAFKA_TOPIC_MANAGMENT']
     KAFKA_SERVER = os.environ['KAFKA_SERVER']
     KAFKA_PORT = os.environ['KAFKA_PORT']

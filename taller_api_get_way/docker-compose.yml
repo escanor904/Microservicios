@@ -74,7 +74,7 @@ services:
       - ./inicializar_logs.sql:/docker-entrypoint-initdb.d/inicializar_logs.sql
     
   consumer:
-    container_name: consumer
+    container_name: api_logs
     build:
       context: ./consumidor
       dockerfile: Dockerfile
@@ -84,7 +84,7 @@ services:
       POSTGRES_PASSWORD: admin_password
       DATABASE_HOST: logs_db
       DATABASE_PORT: 5432
-      KAFKA_TOPIC_NAME: autenticacion-topic
+      KAFKA_TOPIC_NAME: logs-topic
       KAFKA_SERVER: kafka
       KAFKA_PORT: 9092
     ports:
@@ -107,7 +107,7 @@ services:
       POSTGRES_PASSWORD: admin_password
       DATABASE_HOST: db_users
       DATABASE_PORT: 5432
-      KAFKA_TOPIC_NAME: autenticacion-topic
+      KAFKA_TOPIC_LOGS: logs-topic
       KAFKA_TOPIC_MANAGMENT: managment-topic
       KAFKA_SERVER: kafka
       KAFKA_PORT: 9092

@@ -37,11 +37,6 @@ def inicio_sesion():
         data = request.get_json()
         email = data['email']
         password = data['password']
-        nombre_app =  data['application']       
-        tipo_log = data['log_type']             
-        fecha_log = data['timestamp']           
-        descripcion = data['description']       
-        user_email = data['email']
         
         # Establecer una conexión con la base de datos PostgreSQL
         conn = psycopg2.connect(**db_config)
@@ -59,45 +54,37 @@ def inicio_sesion():
            conn.close()
            
            # Autenticación exitosa, envía un mensaje a Kafka
-           mensaje = {"event_type": "inicio_sesion", "user_email": email, "timestamp": str(datetime.now())}
-    
+           mensaje = {"nombre_app": "api_users", "log_type": "info", "descripcion": "inicio de sesión exitoso"}
            producer.send(ProducerConfig.KAFKA_TOPIC_NAME, value=mensaje)
-           
+
+           #crea un log para mostrar en consola 
            logging.basicConfig(level=logging.INFO,  # Establece el nivel de registro (puedes usar 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # Define el formato del mensaje de registro
            logger = logging.getLogger(__name__)
-
            # Registra un mensaje
            logger.info('Mensaje enviado al tema: %s', ProducerConfig.KAFKA_TOPIC_NAME)  
-           now = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-           # Datos para crear un registro de log
-           log_data = {
-               "application": nombre_app,
-               "log_type": tipo_log,
-               "timestamp": now,
-               "description": descripcion,
-               "email" : email
-            }
-           # Realizar una solicitud HTTP POST al servicio de logs para crear el registro            
-           logs_url = f"http://{logs_container_name}:8081/logs"
-           headers = {"Authorization": f"Bearer {access_token}"}
-           response = requests.post(logs_url, json=log_data, headers=headers)
+ 
+        
+           return jsonify({"Token de acceso": access_token}), 200
            
-           if response.status_code == 201:
-            # Generar un token JWT y enviarlo como respuesta
-            return jsonify({"Token de acceso": access_token}), 200
-           else:
-            return jsonify({'message': 'Error al crear el registro de log'}), 500
         else:
             # Cerrar el cursor y la conexión
+            mensaje = {"nombre_app": "api_users", "log_type": "alert", "descripcion": "credenciales incorrectas"}
+            producer.send(ProducerConfig.KAFKA_TOPIC_NAME, value=mensaje)
+
             cursor.close()
             conn.close()
+            
             return jsonify({'message': 'Credenciales incorrectas'}), 401
     except Exception as e:
-        return jsonify({"mensaje": "Se produjo un error inesperado: " + str(e)}), 500
+        
+            mensaje = {"nombre_app": "api_users", "log_type": "error", "descripcion": "se produjo un error inesperado"}
+            producer.send(ProducerConfig.KAFKA_TOPIC_NAME, value=mensaje)
+
+            return jsonify({"mensaje": "Se produjo un error inesperado: " + str(e)}), 500
 
     except jsonschema.exceptions.ValidationError as e:
-        return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema: " + str(e)}), 400
+            return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema: " + str(e)}), 400
  
     
 #--------------------------------------CRUD--------------------------------------
@@ -134,9 +121,8 @@ def registro_usuario():
         cursor.close()
         conn.close()
 
-
-        mensaje = {"event_type": "registro_usuario", "username":username, "user_email": email , "timestamp": str(datetime.now())}
-    
+        #se envia los datos del ususario para registrarlo en api managment
+        mensaje = {"nombre_app": "api_users", "log_type": "info", "descripcion": "registro exitoso" ,"username":username, "user_email": email , "timestamp": str(datetime.now())}
         producer.send(ProducerConfig.KAFKA_TOPIC_MANAGMENT, value=mensaje)
         
         logging.basicConfig(level=logging.INFO,  # Establece el nivel de registro (puedes usar 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')

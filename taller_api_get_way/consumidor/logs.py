@@ -21,32 +21,23 @@ def consumer_loop():
             auto_offset_reset='earliest',
             enable_auto_commit=True,
         )
-        # # Nombre del archivo CSV donde se almacenarán los mensajes
-        # csv_filename = 'logs.csv'
 
-        # # Verifica si el archivo CSV ya existe en la carpeta actual
-        # if not os.path.exists(csv_filename):
-        #     # Si no existe, crea el archivo y escribe la cabecera
-        #     with open(csv_filename, mode='w', newline='') as csv_file:
-        #         fieldnames = ['event_type', 'user_email', 'timestamp']
-        #         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        #         writer.writeheader()
-
+        # muestra el log en la consola
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logger = logging.getLogger(__name__)
 
         for message in consumer:
             # Extraer valores del mensaje de Kafka
-            event_type = message.value.get('event_type')
-            user_email = message.value.get('user_email')
-            timestamp = message.value.get('timestamp')
+            nombre_app = message.value.get('nombre_app')
+            log_type = message.value.get('log_type')
+            descripcion = message.value.get('descripcion')
 
              # Establecer una conexión con la base de datos PostgreSQL
             conn = psycopg2.connect(**ConsumerConfig.db_config)
             cursor = conn.cursor()
             # Ejecutar una consulta SQL para insertar los datos del usuario en la tabla 'users'
-            cursor.execute("INSERT INTO logs (evento, user_email, fecha_log) VALUES (%s, %s, %s)",
-                       (event_type, user_email, timestamp))
+            cursor.execute("INSERT INTO logs (nombre_app, tipo_log, descripcion) VALUES (%s, %s, %s)",
+                       (nombre_app, log_type, descripcion))
 
             # Confirmar la transacción y cerrar el cursor y la conexión
             conn.commit()
@@ -161,17 +152,15 @@ def get_logs_by_application(application):
 def create_log():
     data = request.get_json()
     application = data['application']       #Aplicacion que manda a crear el log
-    log_type = data['log_type']             #Tipo de log (error, advertencia, informacion)
-    timestamp = data['timestamp']           #Fecha y hora en la que se genero el log
+    log_type = data['log_type']             #Tipo de log (error, advertencia, informacion)         #Fecha y hora en la que se genero el log
     description = data['description']       #Descripcion mas detallada del error
-    user_email = data['email']
     
     # Establecer una conexión con la base de datos PostgreSQL
     conn = psycopg2.connect(**ConsumerConfig.db_config)
     cursor = conn.cursor()
     # Ejecutar una consulta SQL para insertar los datos del usuario en la tabla 'logs'
-    cursor.execute("INSERT INTO logs (nombre_app, tipo_log, fecha_log, descripcion, user_email) VALUES (%s, %s, %s, %s, %s)",
-                   (application, log_type, timestamp, description,user_email))
+    cursor.execute("INSERT INTO logs (nombre_app, tipo_log, descripcion) VALUES (%s, %s, %s)",
+                   (application, log_type, description))
     
     # Confirmar la transacción y cerrar el cursor y la conexión
     conn.commit()

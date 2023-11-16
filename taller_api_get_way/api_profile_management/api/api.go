@@ -218,12 +218,13 @@ func tokenIsValid(tokenStr string) bool {
 
 }
 
-func enviarLogKafka(eventTipe string) {
+func enviarLogKafka(eventTipe string, descripcion string) {
 
+	//falta continuarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 	mensaje := map[string]string{
-		"event_type": eventTipe,
-		"user_email": usuarioEnSesion,
-		"timestamp":  time.Now().Format(time.RFC3339),
+		"nombre_app":  "profile_managment",
+		"type_log":    eventTipe,
+		"descripcion": descripcion,
 	}
 
 	// Convertir el mapa a formato JSON
@@ -232,7 +233,7 @@ func enviarLogKafka(eventTipe string) {
 		log.Fatal("Error al convertir el mensaje a JSON:", err)
 	}
 
-	conn, _ := kafka.DialLeader(context.Background(), "tcp", "localhost:9093", "autenticacion-topic", 0)
+	conn, _ := kafka.DialLeader(context.Background(), "tcp", "localhost:9093", "topic_logs", 0)
 	conn.SetWriteDeadline(time.Now().Add(time.Second * 10))
 
 	conn.WriteMessages(kafka.Message{Value: jsonData})

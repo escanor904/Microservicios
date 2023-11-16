@@ -7,16 +7,6 @@ CREATE TABLE users (
   fecha_creacion TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- creacion tabla logs
-CREATE TABLE logs (
-  log_id SERIAL PRIMARY KEY,
-  nombre_app VARCHAR(50) NOT NULL,
-  tipo_log VARCHAR(30) NOT NULL,
-  fecha_log TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  descripcion VARCHAR(100) NOT NULL,
-  user_email VARCHAR(100) NOT NULL,
-  FOREIGN KEY (user_email) REFERENCES users(email)
-);
 
 -- Insertar datos de prueba en la tabla users
 INSERT INTO users (username, hashed_password, email) VALUES
