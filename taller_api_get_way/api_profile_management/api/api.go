@@ -129,7 +129,7 @@ func (a *API) getProfile(w http.ResponseWriter, r *http.Request) {
 		//obtenemos el usuario del token
 		usuarioEnSesion = getEmail(token)
 
-		enviarLogKafka("consulta_profile")
+		enviarLogKafka("info", "consulta de perfil")
 
 		w.Header().Set("Content-Type", "application/json")
 		vars := mux.Vars(r)

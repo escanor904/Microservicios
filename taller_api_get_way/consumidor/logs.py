@@ -1,9 +1,8 @@
-import psycopg2, json,  logging
+import psycopg2,  logging, threading
 from json import loads
 from config_consumidor import  ConsumerConfig
 from kafka import KafkaConsumer
 from flask import Flask, request, jsonify
-import datetime
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -43,15 +42,9 @@ def consumer_loop():
             conn.commit()
             cursor.close()
             conn.close() 
-
-            # # Escribir los valores en el archivo CSV
-            # with open(csv_filename, mode='a', newline='') as csv_file:
-            #     fieldnames = ['event_type', 'user_email', 'timestamp']
-            #     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-            #     writer.writerow({'event_type': event_type, 'user_email': user_email, 'timestamp': timestamp})
-            
+ 
             logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            logger.info("Guardado en logs: event_type=%s, user_email=%s, timestamp=%s" % (event_type, user_email, timestamp))
+            logger.info("Guardado en logs: aplication=%s, log_type=%s, descripcion=%s" % (nombre_app, log_type, descripcion))
 
     except Exception as e:
         logging.error('Error en el bucle del consumidor', e)
@@ -171,5 +164,7 @@ def create_log():
 
 
 if __name__ == '__main__':
+    hiloconsumer = threading.Thread(target=consumer_loop)
+    hiloconsumer.start()
     app.run(debug=True, host='0.0.0.0', port=8081)
-    consumer_loop()
+    
