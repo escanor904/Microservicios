@@ -119,6 +119,32 @@ services:
       - zookeeper
       - kafka
 
+  api_profile_managment:
+
+    container_name: api_managment
+    build:
+      context: ./api_profile_management
+      dockerfile: Dockerfile
+    environment:
+      DB_USER: admin
+      POSTGRES_PASSWORD: admin_password
+      DATABASE_HOST: db_GP
+      DATABASE_PORT: 5432
+      DB_NAME: profile_db
+      KAFKA_TOPIC_LOGS: logs-topic
+      KAFKA_TOPIC_MANAGMENT: managment-topic
+      KAFKA_SERVER: kafka
+      KAFKA_PORT: 9092
+      
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - db_GP
+      - zookeeper
+      - kafka
+
+
 
 
 

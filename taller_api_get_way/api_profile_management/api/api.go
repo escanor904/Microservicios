@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -233,7 +234,9 @@ func enviarLogKafka(eventTipe string, descripcion string) {
 		log.Fatal("Error al convertir el mensaje a JSON:", err)
 	}
 
-	conn, _ := kafka.DialLeader(context.Background(), "tcp", "localhost:9093", "topic_logs", 0)
+	conn, _ := kafka.DialLeader(context.Background(), "tcp", os.Getenv("KAFKA_SERVER")+":"+os.Getenv("KAFKA_PORT"), os.Getenv("KAFKA_TOPIC_LOGS"), 0)
+
+	//conn, _ := kafka.DialLeader(context.Background(), "tcp", "localhost:9093", "topic_logs", 0)
 	conn.SetWriteDeadline(time.Now().Add(time.Second * 10))
 
 	conn.WriteMessages(kafka.Message{Value: jsonData})

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -22,8 +23,8 @@ func EscucharEventos() {
 	log.Printf("Consumer managment lisening")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:   []string{"localhost:9093"},
-		Topic:     "managment-topic",
+		Brokers:   []string{os.Getenv("KAFKA_SERVER") + ":" + os.Getenv("KAFKA_PORT")},
+		Topic:     os.Getenv("KAFKA_TOPIC_MANAGMENT"),
 		Partition: 0,
 		MinBytes:  10e3,
 		MaxBytes:  10e6,
