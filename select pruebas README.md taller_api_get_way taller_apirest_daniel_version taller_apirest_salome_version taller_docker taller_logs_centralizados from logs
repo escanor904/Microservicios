@@ -1,0 +1,14 @@
+                                                         Listado de base de datos
+      Nombre       |  Dueño   | Codificación |   Collate   |    Ctype    | configuración ICU | Proveedor de locale |      Privilegios      
+-------------------+----------+--------------+-------------+-------------+-------------------+---------------------+-----------------------
+ admin             | admin    | UTF8         | es_CO.UTF-8 | es_CO.UTF-8 |                   | libc                | 
+ authentication_db | admin    | UTF8         | es_CO.UTF-8 | es_CO.UTF-8 |                   | libc                | 
+ db_logs           | admin    | UTF8         | es_CO.UTF-8 | es_CO.UTF-8 |                   | libc                | 
+ logs_db           | postgres | UTF8         | es_CO.UTF-8 | es_CO.UTF-8 |                   | libc                | 
+ postgres          | postgres | UTF8         | es_CO.UTF-8 | es_CO.UTF-8 |                   | libc                | 
+ template0         | postgres | UTF8         | es_CO.UTF-8 | es_CO.UTF-8 |                   | libc                | =c/postgres          +
+                   |          |              |             |             |                   |                     | postgres=CTc/postgres
+ template1         | postgres | UTF8         | es_CO.UTF-8 | es_CO.UTF-8 |                   | libc                | =c/postgres          +
+                   |          |              |             |             |                   |                     | postgres=CTc/postgres
+(7 filas)
+

@@ -2,8 +2,7 @@ import psycopg2,  logging, threading
 from json import loads
 from config_consumidor import  ConsumerConfig
 from kafka import KafkaConsumer
-from flask import Flask, request, jsonify
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 
 app = Flask(__name__)
 
@@ -137,6 +136,10 @@ def get_logs_by_application(application):
     cursor.close()
     conn.close()
 
+    # Verificar si no hay registros para la aplicación especificada
+    if not result:
+        abort(400, f"No se encontraron registros para la aplicación '{application}'")
+
     return jsonify(paginated_logs)
 
 
@@ -144,6 +147,8 @@ def get_logs_by_application(application):
 @app.route('/logs', methods=['POST'])
 def create_log():
     data = request.get_json()
+    if not data or 'application' not in data or 'log_type' not in data or 'description' not in data:
+        return jsonify({'message': 'Datos faltantes'}), 400  # Si faltan datos, retorna un código 400
     application = data['application']       #Aplicacion que manda a crear el log
     log_type = data['log_type']             #Tipo de log (error, advertencia, informacion)         #Fecha y hora en la que se genero el log
     description = data['description']       #Descripcion mas detallada del error

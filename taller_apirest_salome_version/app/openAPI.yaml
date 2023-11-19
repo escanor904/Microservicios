@@ -76,7 +76,7 @@ paths:
      # Resumen del propósito del endpoint
       summary: Cambiar contraseña de usuario autenticado
       security:
-        - jwt: [] #  Indica que se requiere un token JWT para acceder al endpoint
+        - BearerAuth: [] #  Indica que se requiere un token JWT para acceder al endpoint
       requestBody: # Define el cuerpo de la solicitud requerido para este endpoint
         required: true
         # El cuerpo de la solicitud es obligatorio
@@ -393,8 +393,7 @@ paths:
       # Descripción más detallada del propósito del endpoint
       
       security:
-        - jwt: []
-        # Se requiere un token JWT para acceder al endpoint
+        - BearerAuth: [] # Se requiere un token JWT para acceder al endpoint
         
       requestBody:
         required: true
@@ -446,8 +445,7 @@ paths:
       # Descripción más detallada del propósito del endpoint
       
       security:
-        - jwt: []
-        # Se requiere un token JWT para acceder al endpoint
+        - BearerAuth: []# Se requiere un token JWT para acceder al endpoint
         
       responses:
         '200':
@@ -469,14 +467,9 @@ paths:
           description: Error en el servidor
           # Descripción de la respuesta para el código de estado 500 (Error en el servidor)
 
-  
-
-
 components:  # Componentes reutilizables
   securitySchemes:  # Esquemas de seguridad definidos
     BearerAuth:  # Nombre del esquema
       type: http  # Tipo de esquema: HTTP
       scheme: bearer  # Tipo de autenticación: bearer token
       bearerFormat: JWT  # Formato del token: JWT
-
-

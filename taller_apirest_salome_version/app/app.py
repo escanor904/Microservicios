@@ -6,9 +6,6 @@ from string import ascii_letters, digits
 from datetime import datetime, timedelta
 from config import db_config , DevelopmentConfig
 
-
-
-
 app = Flask(__name__)
 # Configuración del JWT
 app.config['JWT_SECRET_KEY'] = DevelopmentConfig.SECRET_KEY
@@ -20,9 +17,6 @@ reset_tokens = []
 @app.route('/inicio_sesion', methods=['POST'])
 def inicio_sesion():     
     try:
-        
-    
-        
         # Establecer una conexión con la base de datos PostgreSQL
         conn = psycopg2.connect(**db_config)
         cursor = conn.cursor()
@@ -31,14 +25,11 @@ def inicio_sesion():
         data = request.get_json()
         email = data['email']
         password = data['password']
-    
         
         # Buscar al usuario en la base de datos por su email
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
-        
-        
-        
+
         if user and user[2] == password:  # Verificar contraseña (esto debe ser un hash en la vida real)
            # Generar un token JWT
            
@@ -65,10 +56,8 @@ def inicio_sesion():
     except jsonschema.exceptions.ValidationError as e:
         return jsonify({"mensaje": "La respuesta no cumple con el JSON Schema:"+e}), 400
             
-
-
 #--------------------------------------CAMBIAR CONTRASEÑA------------------------
-@app.route('/cambio_contrasena', methods=['POST'])
+@app.route('/users/cambio_contrasena', methods=['POST'])
 @jwt_required()
 def cambio_contrasena():
     
@@ -112,11 +101,9 @@ def cambio_contrasena():
         #print("La respuesta no cumple con el JSON Schema:")
         #print(e)
     
-    
-
 #--------------------------------------RECUPERAR CLAVE---------------------------
 # Ruta para solicitar recuperación de contraseña
-@app.route('/recuperacion_contra', methods=['POST'])
+@app.route('/users/recuperacion_contra', methods=['POST'])
 def recuperacion_contrasena():
     
     try:
@@ -165,10 +152,8 @@ def recuperacion_contrasena():
         #print("La respuesta no cumple con el JSON Schema:")
         #print(e)
 
-
-
 #-------------------------------------RESTABLECIMIENTO CONTRASEÑA-------------------------------------
-@app.route('/restablecemiento_contra', methods=['POST'])
+@app.route('/users/restablecemiento_contra', methods=['POST'])
 def restablecemiento_contrasena():
     data = request.get_json()
     email = data['email']
@@ -200,7 +185,6 @@ def restablecemiento_contrasena():
             return jsonify({"mensaje": "Token de recuperacion invalido o expirado"}), 400
     else:
         return jsonify({"mensaje": "No se encontro el token de recuperacion"}), 400
-
 
 #---------------------------------LISTAR USUARIOS PAGINADOS------------------------------------
 # Definición de una ruta para listar todos los usuarios por paginacion
@@ -252,7 +236,6 @@ def list_users():
         # En caso de error, devuelve una respuesta JSON con el mensaje de error y el código 500 (Internal Server Error)
         return jsonify({"error": str(e)}), 500
 
-
 #--------------------------------------CRUD--------------------------------------
 # Definición de una ruta para el registro de usuarios
 @app.route('/registro', methods=['POST'])
@@ -291,7 +274,6 @@ def registro_usuario():
 
     except Exception as e:
         return jsonify({"error": "Error en el servidor"}), 500
-
 
 # Definición de una ruta para obtener un usuario
 @app.route('/users/<int:user_id>', methods=['GET'])
@@ -352,7 +334,6 @@ def actualizacion_usuario():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 # Definición de una ruta para eliminar un usuario
 @app.route('/eliminacion_usuario', methods=['DELETE'])
 @jwt_required()
@@ -385,16 +366,11 @@ def eliminacion_usuario():
         return jsonify({"error": str(e)}), 500
 
 #---------------------------------------FIN CRUD---------------------------------------
- 
-
-
-
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
-
 
 if __name__ == '__main__':
     #Se activa el debug para poder hacer cambios en el servidor en tiempo real
     app.debug = True
     app.register_error_handler(404, status_404)
-    app.run(host='0.0.0.0', port=5001)
+    app.run(host='0.0.0.0', port=5000)
