@@ -221,10 +221,9 @@ func tokenIsValid(tokenStr string) bool {
 
 func enviarLogKafka(eventTipe string, descripcion string) {
 
-	//falta continuarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 	mensaje := map[string]string{
 		"nombre_app":  "profile_managment",
-		"type_log":    eventTipe,
+		"log_type":    eventTipe,
 		"descripcion": descripcion,
 	}
 

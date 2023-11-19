@@ -36,7 +36,7 @@ def consumer_loop():
             cursor = conn.cursor()
             # Ejecutar una consulta SQL para insertar los datos del usuario en la tabla 'users'
             cursor.execute("INSERT INTO logs (nombre_app, tipo_log, descripcion) VALUES (%s, %s, %s)",
-                       (nombre_app, log_type, descripcion))
+                           (nombre_app, log_type, descripcion))
 
             # Confirmar la transacción y cerrar el cursor y la conexión
             conn.commit()
