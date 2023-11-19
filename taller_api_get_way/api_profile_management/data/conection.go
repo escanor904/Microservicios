@@ -27,8 +27,6 @@ func GetConection() *sql.DB {
 		log.Fatalf("Error: Unable to connect to database: %v", err)
 	}
 
-	log.Printf("Connected to the database")
-
 	return db
 
 }

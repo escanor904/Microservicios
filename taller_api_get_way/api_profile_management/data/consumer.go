@@ -11,7 +11,6 @@ import (
 )
 
 type Registro struct {
-	EventType string `json:"event_type"`
 	Username  string `json:"username"`
 	UserEmail string `json:"user_email"`
 	Timestamp string `json:"timestamp"`
@@ -19,8 +18,6 @@ type Registro struct {
 
 // el metodo tiene que comenzar por mayuscula para que sea publico
 func EscucharEventos() {
-
-	log.Printf("Consumer managment lisening")
 
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:   []string{os.Getenv("KAFKA_SERVER") + ":" + os.Getenv("KAFKA_PORT")},
@@ -33,10 +30,11 @@ func EscucharEventos() {
 	r.SetOffset(0)
 
 	for {
+
 		m, err := r.ReadMessage(context.Background())
 
 		if err != nil {
-			break
+			log.Printf("entro a el error" + err.Error())
 		}
 
 		registro := Registro{}

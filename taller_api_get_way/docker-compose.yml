@@ -120,7 +120,6 @@ services:
       - kafka
 
   api_profile_managment:
-
     container_name: api_managment
     build:
       context: ./api_profile_management

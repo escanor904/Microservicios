@@ -120,9 +120,11 @@ def registro_usuario():
         conn.commit()
         cursor.close()
         conn.close()
+        
+    
 
         #se envia los datos del ususario para registrarlo en api managment
-        mensaje = {"nombre_app": "api_users", "log_type": "info", "descripcion": "registro exitoso" ,"username":username, "user_email": email , "timestamp": str(datetime.now())}
+        mensaje = {"username":username, "user_email": email , "timestamp": str(datetime.now())}
         producer.send(ProducerConfig.KAFKA_TOPIC_MANAGMENT, value=mensaje)
         
         logging.basicConfig(level=logging.INFO,  # Establece el nivel de registro (puedes usar 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL')
