@@ -1,9 +1,17 @@
 const express = require('express');
 const axios = require('axios');
 const winston = require('winston');
+const KafkaTransport = require('winston-kafka-transport');
 
 const app = express();
 const PORT = 3000;
+
+const kafkaTransport = new KafkaTransport({
+  client: {
+    kafkaHost: 'localhost:9092', // ReemplaSza con la dirección de tu servidor Kafka
+  },
+  topic: 'KAFKA_TOPIC_LOGS', // Reemplaza con el nombre del tópico Kafka
+});
 
 const logger = winston.createLogger({
   level: 'info',
@@ -13,11 +21,8 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'api-gateway' },
   transports: [
-    new winston.transports.Http({
-      host: '127.0.0.1',
-      port: 5000,
-      path: '/log',
-    }),
+    new winston.transports.Console(), // También puedes conservar la consola si lo deseas
+    kafkaTransport,
   ],
 });
 
