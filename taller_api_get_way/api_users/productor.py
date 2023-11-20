@@ -6,6 +6,7 @@ from config_productor import db_config , ProducerConfig
 from kafka import KafkaProducer
 #from confluent_kafka import Producer
 
+
 #config = {
 #    'bootstrap.servers': f'{ProducerConfig.KAFKA_SERVER}:{ProducerConfig.KAFKA_PORT}',  # Dirección del servidor Kafka
 #    'client.id':  socket.gethostname()
@@ -46,7 +47,7 @@ def inicio_sesion():
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
 
-        if user and user[2] == password:  # Verificar contraseña (esto debe ser un hash en la vida real)
+        if user and user[2] == password:  
            # Generar un token JWT
            access_token = create_access_token(identity=email)
            # Cerrar el cursor y la conexión
@@ -54,7 +55,7 @@ def inicio_sesion():
            conn.close()
            
            # Autenticación exitosa, envía un mensaje a Kafka
-           mensaje = {"nombre_app": "api_users", "log_type": "info", "descripcion": "inicio de sesión exitoso"}
+           mensaje = {"nombre_app": "api_authentication", "log_type": "info", "descripcion": "inicio de sesión exitoso"}
            producer.send(ProducerConfig.KAFKA_TOPIC_NAME, value=mensaje)
 
            #crea un log para mostrar en consola 
@@ -69,7 +70,7 @@ def inicio_sesion():
            
         else:
             # Cerrar el cursor y la conexión
-            mensaje = {"nombre_app": "api_users", "log_type": "alert", "descripcion": "credenciales incorrectas"}
+            mensaje = {"nombre_app": "api_authentication", "log_type": "alert", "descripcion": "credenciales incorrectas"}
             producer.send(ProducerConfig.KAFKA_TOPIC_NAME, value=mensaje)
 
             cursor.close()
@@ -180,7 +181,63 @@ def delivery_report(err, msg):
         print('Error al enviar el mensaje: {}'.format(err))
     else:
         print('Mensaje enviado a {} [{}]'.format(msg.topic(), msg.partition()))
-           
+
+#--------------------------------RUTAS SALUD------------------------------------
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({"status": "OK"})
+
+@app.route('/health/ready', methods=['GET'])
+def health_ready():
+    if check_services_ready():
+        return jsonify({"status": "Listo"}, 200)
+    else:
+        return jsonify({"status": "No estan listos"}, 503) 
+
+def check_services_ready():
+    # Realiza comprobaciones para verificar si los servicios están listos
+    database_ready = verificar_conexion_bd()
+    kafka_ready = verificar_kafka()
+
+    # Verifica si todos los servicios están listos
+    if database_ready and kafka_ready:
+        return True
+    else:
+        return False
+    
+@app.route('/health/live', methods=['GET'])
+def health_live():
+    # Verifica la disponibilidad de recursos en este caso la base de datos
+    if verificar_conexion_bd():
+        return jsonify({"status": "Live"}, 200)
+    else:
+        # Devuelve un código de estado 503 si no está en vivo
+        return jsonify({"status": "Not Live"}, 503) 
+
+def verificar_conexion_bd():
+    try:
+        # Establecer conexión con la base de datos PostgreSQL
+        conn= psycopg2.connect(**db_config)
+      
+        # Verificar si la conexión se ha establecido correctamente
+        if conn:
+            print("Conexión exitosa a la base de datos PostgreSQL.")
+            conn.close()
+            return True
+
+    except psycopg2.OperationalError as e:
+        print(f"Error al conectar a la base de datos: {e}")
+        return False
+
+def verificar_kafka():
+    try:
+        producer.send(ProducerConfig.KAFKA_TOPIC_NAME, value={"test": "message"})
+        return True
+    except Exception as e:
+        print(f"Error al conectar a Kafka: {e}")
+        return False
+
+
 def status_404(error):
     return "<h1>Página no encontrada</h1>", 404
 

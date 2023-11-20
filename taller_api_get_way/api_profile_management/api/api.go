@@ -3,6 +3,7 @@ package api
 import (
 	"apigetWay/api_gestion/data"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -239,4 +240,81 @@ func enviarLogKafka(eventTipe string, descripcion string) {
 	conn.SetWriteDeadline(time.Now().Add(time.Second * 10))
 
 	conn.WriteMessages(kafka.Message{Value: jsonData})
+}
+
+// --------------------------Ruta Salud-----------------
+// Función para verificar la conexión a la base de datos
+const (
+	DBHost     = "localhost"
+	DBPort     = 5433
+	DBUser     = "admin"
+	DBPassword = "admin_password"
+	DBName     = "profile_db"
+)
+
+func verificar_conexion_bd() bool {
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", DBHost, DBPort, DBUser, DBPassword, DBName)
+
+	// Intenta conectar a la base de datos
+	db, err := sql.Open("postgres", connectionString)
+	if err != nil {
+		fmt.Println("Error al conectar a la base de datos:", err)
+		return false
+	}
+	defer db.Close()
+
+	// Intenta realizar una consulta simple para verificar la conexión
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("Error al hacer ping a la base de datos:", err)
+		return false
+	}
+
+	// Si no hubo errores en la conexión y el ping fue exitoso, retorna true
+	return true
+}
+
+// Función para verificar la disponibilidad de Kafka
+func verificar_kafka() bool {
+	// Establecer los parámetros de conexión a Kafka
+	brokerAddress := "localhost:9092" // Reemplaza con la dirección del broker de Kafka
+
+	// Intenta conectar al broker de Kafka
+	conn, err := kafka.Dial("tcp", brokerAddress)
+	if err != nil {
+		// Error al conectar a Kafka
+		return false
+	}
+	defer conn.Close()
+
+	// Intenta enviar un mensaje de prueba a Kafka
+	_, err = conn.WriteMessages(
+		kafka.Message{Value: []byte("Prueba de conexión a Kafka")},
+	)
+	if err != nil {
+		// Error al enviar el mensaje
+		return false
+	}
+
+	// Si no hubo errores, Kafka está disponible
+	return true
+}
+
+func (a *API) healthReady(w http.ResponseWriter, r *http.Request) {
+	if verificar_conexion_bd() && verificar_kafka() {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Ready")
+	} else {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprintf(w, "Not Ready")
+	}
+}
+func (a *API) health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Health check OK")
+}
+
+func (a *API) healthLive(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Live")
 }

@@ -167,6 +167,47 @@ def create_log():
    
     return jsonify({'message': 'Log creado exitosamente'}), 201
 
+#---------------------------Rutas salud------------------
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'message': 'Health check OK'})
+
+@app.route('/health/ready', methods=['GET'])
+def health_ready():
+    database_ready = verificar_conexion_bd
+    kafka_ready = verificar_kafka
+
+    if database_ready and kafka_ready:
+        return jsonify({'status': 'Ready'})
+    else:
+        return jsonify({'status': 'Not Ready'}), 503  # Devuelve un código de estado 503 si no está listo
+
+@app.route('/health/live', methods=['GET'])
+def health_live():
+    return jsonify({'message': 'Live'})
+
+def verificar_conexion_bd():
+    try:
+        # Establecer conexión con la base de datos PostgreSQL
+        conn= psycopg2.connect(**ConsumerConfig.db_config)
+      
+        # Verificar si la conexión se ha establecido correctamente
+        if conn:
+            print("Conexión exitosa a la base de datos PostgreSQL.")
+            conn.close()
+            return True
+
+    except psycopg2.OperationalError as e:
+        print(f"Error al conectar a la base de datos: {e}")
+        return False
+
+def verificar_kafka():
+    try:
+        consumer_loop.send(ConsumerConfig.KAFKA_TOPIC_NAME, value={"test": "message"})
+        return True
+    except Exception as e:
+        print(f"Error al conectar a Kafka: {e}")
+        return False
 
 if __name__ == '__main__':
     hiloconsumer = threading.Thread(target=consumer_loop)
