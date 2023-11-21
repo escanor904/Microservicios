@@ -1,17 +1,9 @@
 const express = require('express');
 const axios = require('axios');
 const winston = require('winston');
-const KafkaTransport = require('winston-kafka-transport');
 
 const app = express();
 const PORT = 3000;
-
-const kafkaTransport = new KafkaTransport({
-  client: {
-    kafkaHost: 'localhost:9092', // ReemplaSza con la dirección de tu servidor Kafka
-  },
-  topic: 'KAFKA_TOPIC_LOGS', // Reemplaza con el nombre del tópico Kafka
-});
 
 const logger = winston.createLogger({
   level: 'info',
@@ -21,8 +13,11 @@ const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'api-gateway' },
   transports: [
-    new winston.transports.Console(), // También puedes conservar la consola si lo deseas
-    kafkaTransport,
+    new winston.transports.Http({
+      host: '127.0.0.1',
+      port: 9092,
+      path: '/log',
+    }),
   ],
 });
 
@@ -36,7 +31,7 @@ const logMiddleware = (req, res, next) => {
   next();
 };
 
-const logResponse = (req, res) => {
+const logResponse = (req,res) => {
   let logInfo = {
     application: 'api-gateway', // Nombre de la aplicación
     log_type: 'info', // Tipo de log (puedes personalizar esto según tus necesidades)
@@ -95,70 +90,59 @@ app.use(express.json());
 app.use(logMiddleware);
 
 // Ruta para recibir y reenviar el token
-app.get('/mostrarPerfil', (req, res) => {
+app.get('/mostrarPerfil', async (req, res) => {
   try {
-    const receivedToken = req.query.token; // Recibe el token desde la variable de consulta
+    const receivedToken = req.headers.authorization; // Recibe el token desde el encabezado
 
     if (!receivedToken) {
-      return res.status(400).json({ error: 'Falta el token en la variable de consulta' });
+      return res.status(400).json({ error: 'Falta el token en el encabezado' });
     }
 
-    // Envía el token a la otra aplicación
+    // Envía el token a la otra aplicación en el encabezado
     const otherAppURL = 'http://127.0.0.1:8080/getProfile'; // Reemplaza con la URL real
-    axios.post(otherAppURL, { token: receivedToken });
+    await axios.get(otherAppURL, {
+      headers: {
+        Authorization: receivedToken, // Incluir el token en el encabezado
+      },
+    });
 
     res.json({ message: 'Token enviado correctamente' });
   } catch (error) {
+    console.error('Error sending token:', error);
     res.status(500).json({ error: 'Error al enviar el token' });
   }
 });
 
-app.update('/updateProfile', async (req, res) => {
+app.put('/updateProfile', async (req, res) => {
   try {
-    const { token, username, personalpage, correspondence, biography, organization, country, linkedinUrl, publicInformation } = req.body;
+    const { username, personalpage, biography, organization, country, linkedinUrl, publicInformation } = req.body;
+    const token = req.headers.authorization; // Obtener el token del encabezado
 
     if (!token) {
       return res.status(400).json({ error: 'Falta el token en la solicitud' });
     }
 
-    // Log al recibir datos
-    let logInfoReceive = {
-      application: 'api-gateway',
-      log_type: 'info',
-      timestamp: new Date().toISOString(),
-      description: 'Received bad data for storage'
-    };
-    logger.info(logInfoReceive);
-
     // Envía el token y otros datos a otra API
     const otherApiURL = 'http://127.0.0.1:8080/updateProfile'; // Reemplaza con la URL real
-    await axios.post(otherApiURL, { token, username, personalpage, correspondence, biography, organization, country, linkedinUrl, publicInformation });
-
-    // Log al enviar datos a otra API
-    let logInfoSend = {
-      application: 'api-gateway',
-      log_type: 'info',
-      timestamp: new Date().toISOString(),
-      description: 'Sent data to another API',
-      data: { username, personalpage, correspondence, biography, organization, country, linkedinUrl, publicInformation },
-    };
-    logger.info(logInfoSend);
+    await axios.put(
+      otherApiURL,
+      { username, personalpage, biography, organization, country, linkedinUrl, publicInformation },
+      {
+        headers: {
+          Authorization: token, // Incluir el token en el encabezado
+        },
+      }
+    );
 
     res.json({ message: 'Datos almacenados y enviados correctamente' });
   } catch (error) {
-    // Log en caso de error
-    let logError = {
-      application: 'api-gateway',
-      log_type: 'error',
-      timestamp: new Date().toISOString(),
-      description: 'Error processing the request',
-      error: error.message,
-    };
-    logger.error(logError);
+    console.error('Error processing request:', error);
 
     res.status(500).json({ error: 'Error al procesar la solicitud' });
   }
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`API Gateway Funcionando En El Puerto ${PORT}`);
