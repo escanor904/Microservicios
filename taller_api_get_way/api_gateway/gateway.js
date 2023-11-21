@@ -142,8 +142,6 @@ app.put('/updateProfile', async (req, res) => {
   }
 });
 
-
-
 app.listen(PORT, () => {
   console.log(`API Gateway Funcionando En El Puerto ${PORT}`);
 });
