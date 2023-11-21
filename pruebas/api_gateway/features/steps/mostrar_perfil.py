@@ -1,5 +1,5 @@
-import requests
-from behave import *
+import requests, secrets 
+from behave import given, when, then
 
 @given('se tiene un usuario está autenticado con un token valido')
 def step_impl(context):
@@ -13,7 +13,7 @@ def step_impl(context):
 def step_impl(context):
     email = "isaac_n@email.com"
     headers = {'Authorization': f'Bearer {context.token}'}
-    url = f'http://localhost:8080/api/getProfile/{email}'  
+    url = f'http://127.0.0.1:3000/mostrarPerfil/{email}'  
     context.response = requests.get(url, headers=headers)
 
 

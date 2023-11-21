@@ -1,6 +1,11 @@
-from behave import given, when, then
 import requests
-usuario_autenticado = True
+from behave import given, when, then
+
+@given('iniciar sesion en el perfil que se quiere actualizar')
+def usuario_en_sesion(context):
+    usuario_autenticado = True
+    correo_usuario = "usuario@correo.com"
+    context.correo_usuario = correo_usuario
 
 @given('iniciar sesion en el perfil que se quiere actualizar')
 def usuario_en_sesion(context):
@@ -25,9 +30,8 @@ def actualizar_perfil_con_datos_validos(context):
             "LinkedInURL": "NuevoLinkedIn",
             "PublicInformation": True
         }
-
         # URL para la solicitud de actualización
-        url = f"http://127.0.0.1:8080/updateProfile/{correo_actualizar}"
+        url = f"http://127.0.0.1:3000/updateProfile/{correo_actualizar}"
 
         try:
             response = requests.post(url, json=datos_actualizacion)
@@ -36,6 +40,7 @@ def actualizar_perfil_con_datos_validos(context):
             context.error = e
     else:
         raise Exception("El usuario no está autenticado. Por favor, inicia sesión primero.")
+
 
 @when('se intenta actualizar el perfil del usuario con datos incorrectos')
 def actualizar_perfil_con_datos_validos(context):
@@ -53,7 +58,7 @@ def actualizar_perfil_con_datos_validos(context):
         }
 
         # URL para la solicitud de actualización
-        url = f"http://127.0.0.1:8080/updateProfile/{correo_actualizar}"
+        url = f"http://127.0.0.1:3000/updateProfile/{correo_actualizar}"
 
         try:
             response = requests.post(url, json=datos_actualizacion)

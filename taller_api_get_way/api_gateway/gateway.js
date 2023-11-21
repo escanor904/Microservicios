@@ -126,7 +126,7 @@ app.update('/updateProfile', async (req, res) => {
     logger.info(logInfoReceive);
 
     // Envía el token y otros datos a otra API
-    const otherApiURL = 'http://127.0.0.1:8080/updateProfile'; // Reemplaza con la URL real
+    const otherApiURL = 'http://127.0.0.1:8080/updateProfile';
     await axios.post(otherApiURL, { token, username, personalpage, correspondence, biography, organization, country, linkedinUrl, publicInformation });
 
     // Log al enviar datos a otra API
