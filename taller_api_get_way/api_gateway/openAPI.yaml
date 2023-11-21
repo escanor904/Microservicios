@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: API Gateway
+  version: 1.0.0
+  description: API Gateway for managing authentication and user profiles
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /auth:
+    post:
+      summary: Authenticate User
+      operationId: authenticateUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful authentication
+        '400':
+          description: Bad request
+        '500':
+          description: Internal Server Error
+
+  /register:
+    post:
+      summary: Register User
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Successful registration
+        '400':
+          description: Bad request
+        '500':
+          description: Internal Server Error
+
+  /mostrarPerfil:
+    get:
+      summary: Retrieve User Profile
+      operationId: retrieveUserProfile
+      responses:
+        '200':
+          description: Successful retrieval
+        '400':
+          description: Bad request (missing token)
+        '500':
+          description: Internal Server Error
+
+  /updateProfile:
+    put:
+      summary: Update User Profile
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                personalpage:
+                  type: string
+                biography:
+                  type: string
+                organization:
+                  type: string
+                country:
+                  type: string
+                linkedinUrl:
+                  type: string
+                publicInformation:
+                  type: string
+      responses:
+        '200':
+          description: Successful update
+        '400':
+          description: Bad request (missing token)
+        '500':
+          description: Internal Server Error
