@@ -1,23 +1,17 @@
-# Usamos la imagen base de Node.js
-FROM node:latest
+# Use an official Node.js runtime as a parent image
+FROM node:14
 
-# Establecemos el directorio de trabajo en la aplicación
+# Set the working directory in the container
 WORKDIR /app
 
-#Actualizamos
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install npm
+# Copy package.json and package-lock.json to the working directory
+COPY gateway.js ./
 
-# Instalamos las dependencias
-RUN npm install express
-RUN npm install axios
-RUN npm install winston
+# Install dependencies
+RUN npm install
 
-# Copiamos el resto de los archivos de la aplicación
-COPY . .
-
-# Exponemos el puerto 3000 (el puerto en el que la app está escuchando)
+# Expose the port that the application will run on
 EXPOSE 3000
 
-# Comando para iniciar la aplicación cuando se ejecute el contenedor
+# Command to run the application
 CMD ["node", "gateway.js"]
